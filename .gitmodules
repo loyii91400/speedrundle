@@ -1,0 +1,3 @@
+[submodule "puzzles/wordleTest"]
+	path = puzzles/wordleTest
+	url = https://github.com/loyii91400/wordleTest
