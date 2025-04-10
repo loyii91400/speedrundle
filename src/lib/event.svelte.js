@@ -8,6 +8,11 @@ try {
         console.log('Win!')
         puzzlesStore.incrementCurrentPuzzle()
         nextPuzzleStore.nextPuzzle = true;
+      } else if (message.data.status === 'LOSE') {
+        console.log('Lose!')
+        puzzlesStore.incrementCurrentPuzzle()
+        nextPuzzleStore.nextPuzzle = true;
+        nextPuzzleStore.dnf = true
       }
       sendResponse({ status: 'received' });
     }

@@ -1,7 +1,9 @@
 // @class puzzle 
 // @field name string - The name of the puzzle
+// @field sourceUrl string - The url of the source of the puzzle
 // @field url string - The url to the puzzle
 // @field icon string - The url to the icon
+// @field active boolean - Whether the puzzle is active
 // @field winCheck { type: string, newValue: string, oldValue?: string | null } - The win check configuration
 // @field loseCheck { type: string, newValue: string, oldValue?: string | null } - The win check configuration
 
@@ -9,22 +11,22 @@
 export const isDebug = import.meta.env.DEV; // Set this based on your debug environment
 
 // Initial puzzle list
-const initialPuzzles = [{
-  name: 'Wordle',
-  url: 'https://web.archive.org/web/20250409011241/https://www.nytimes.com/games/wordle/index.html',
-  // url: 'https://www.nytimes.com/games/wordle/index.html',
-  icon: 'https://www.nytimes.com/games-assets/v2/metadata/wordle-apple-touch-icon.png?v=v2504091145',
-  winCheck: { type: 'characterData', newValue: 'Congratulations!', oldValue: null },
-  loseCheck: { type: 'characterData', newValue: 'Thanks for playing today!', oldValue: null }
-},{
-  name: 'Wordle',
-  url: 'https://web.archive.org/web/20250407092409/https://www.nytimes.com/games/wordle/index.html',
-  // url: 'https://www.nytimes.com/games/wordle/index.html',
-  icon: 'https://www.nytimes.com/games-assets/v2/metadata/wordle-apple-touch-icon.png?v=v2504091145',
-  winCheck: { type: 'characterData', newValue: 'Congratulations!', oldValue: null },
-  loseCheck: { type: 'characterData', newValue: 'Thanks for playing today!', oldValue: null }
-}];
-// const initialPuzzles = [];
+// const initialPuzzles = [{
+//   name: 'Wordle',
+//   url: 'https://web.archive.org/web/20250409011241/https://www.nytimes.com/games/wordle/index.html',
+//   // url: 'https://www.nytimes.com/games/wordle/index.html',
+//   icon: 'https://www.nytimes.com/games-assets/v2/metadata/wordle-apple-touch-icon.png?v=v2504091145',
+//   winCheck: { type: 'characterData', newValue: 'Congratulations!', oldValue: null },
+//   loseCheck: { type: 'characterData', newValue: 'Thanks for playing today!', oldValue: null }
+// }, {
+//   name: 'Wordle',
+//   url: 'https://web.archive.org/web/20250407092409/https://www.nytimes.com/games/wordle/index.html',
+//   // url: 'https://www.nytimes.com/games/wordle/index.html',
+//   icon: 'https://www.nytimes.com/games-assets/v2/metadata/wordle-apple-touch-icon.png?v=v2504091145',
+//   winCheck: { type: 'characterData', newValue: 'Congratulations!', oldValue: null },
+//   loseCheck: { type: 'characterData', newValue: 'Thanks for playing today!', oldValue: null }
+// }];
+const initialPuzzles = [];
 
 function createPuzzles() {
   let puzzles = $state(initialPuzzles);
@@ -33,6 +35,13 @@ function createPuzzles() {
   return {
     get puzzles() {
       return puzzles;
+    },
+    get activePuzzles() {
+      return puzzles.filter(p => p.active); 
+    },
+    set puzzles(value) {
+      puzzles = value;
+      this.save();
     },
     get currentPuzzle() {
       return currentPuzzle;
@@ -79,7 +88,7 @@ function createPuzzles() {
       if (isDebug) {
         localStorage.setItem('puzzles', JSON.stringify(puzzles));
       } else {
-chrome.storage.local.set({ puzzles: Array.from(puzzles) });
+        chrome.storage.local.set({ puzzles: Array.from(puzzles) });
         chrome.storage.local.set({ currentPuzzle });
       }
     }
@@ -88,5 +97,5 @@ chrome.storage.local.set({ puzzles: Array.from(puzzles) });
 
 const puzzlesStore = createPuzzles();
 // puzzlesStore.load();
-puzzlesStore.save();
+// puzzlesStore.save();
 export default puzzlesStore
