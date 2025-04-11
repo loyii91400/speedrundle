@@ -21,14 +21,14 @@ function createSourceUrls() {
         if (savedSourceUrls) {
           sourceUrls = JSON.parse(savedSourceUrls);
         } else {
-          sourceUrls = 'https://raw.githubusercontent.com/loyii91400/wordleTest/refs/heads/main/links.json';
+          sourceUrls = 'https://raw.githubusercontent.com/loyii91400/speedrundlePuzzles/refs/heads/main/links.json';
         }
      } else {
         chrome.storage.local.get(['sourceUrls'], (result) => {
           if (result.sourceUrls) {
             sourceUrls = result.sourceUrls;
           } else {
-            sourceUrls = 'https://raw.githubusercontent.com/loyii91400/wordleTest/refs/heads/main/links.json';
+            sourceUrls = 'https://raw.githubusercontent.com/loyii91400/speedrundlePuzzles/refs/heads/main/links.json';
           }
         });
       }

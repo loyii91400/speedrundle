@@ -1,3 +1,3 @@
-[submodule "puzzles/wordleTest"]
-	path = puzzles/wordleTest
-	url = https://github.com/loyii91400/wordleTest
+[submodule "puzzles/speedrundlePuzzles"]
+	path = puzzles/speedrundlePuzzles
+	url = git@github.com:loyii91400/speedrundlePuzzles.git

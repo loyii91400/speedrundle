@@ -61,5 +61,20 @@
       "text": "Congratulations"
     },
     "loseCheck": null
+  },
+  {
+    "name": "Bandle",
+    "url": "https://bandle.app/daily",
+    "icon": "https://bandle.app/favicon.ico",
+    "winCheck": {
+      "mutationType": "",
+      "query": "div",
+      "text": "You got it!"
+    },
+    "loseCheck": {
+      "mutationType": "",
+      "query": "div",
+      "text": "Good effort!"
+    }
   }
 ]
