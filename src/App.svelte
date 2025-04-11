@@ -4,6 +4,7 @@
   import puzzlesStore from "./lib/store/puzzles.svelte.js";
   import nextPuzzleStore from "./lib/store/nextPuzzle.svelte";
   import { onMount } from "svelte";
+  import confetti from "canvas-confetti";
   // import './lib/injectScript.svelte.js';
   import "./lib/event.svelte.js";
 
@@ -88,6 +89,7 @@
   function stop() {
     timerRef.stop();
     finishTime = timerRef.getFormattedTime();
+    confetti();
   }
 
   function reset() {
