@@ -36,6 +36,20 @@
 
     draggedPuzzle = null;
   }
+  
+  function openPuzzle(url) {
+    
+    try {
+      chrome.tabs.create(
+        {
+          url,
+          active: true,
+        },
+      );
+    } catch (error) {
+      window.open(url, "_blank");
+    }
+  }
 </script>
 
 <div class="flex flex-col gap-2">
@@ -46,9 +60,9 @@
       role="option"
       aria-selected={false}
       tabindex="0"
-      on:dragstart={() => handleDragStart(index)}
-      on:dragover={handleDragOver}
-      on:drop={() => handleDrop(index)}
+      ondragstart={() => handleDragStart(index)}
+      ondragover={handleDragOver}
+      ondrop={() => handleDrop(index)}
     >
       <svg 
         xmlns="http://www.w3.org/2000/svg" 
@@ -60,7 +74,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
       <img width="32" height="32" src={puzzle.icon} alt={puzzle.name} />
-      <a href={puzzle.url} target="_blank" rel="noopener noreferrer">{puzzle.name}</a>
+      <button class="cursor-pointer" onclick={() => openPuzzle(puzzle.url)}>{puzzle.name}</button>
       <div class="ml-auto {splits[index] === 'DNF' ? 'text-red-500' : 'text-green-500'}">{splits[index] ?? '' }</div>
     </div>
   {/each}

@@ -25,6 +25,8 @@
   let splits = $state([]);
   let puzzles = $derived(puzzlesStore.activePuzzles);
   let finishTime = $state(null);
+  
+  let puzzleTabId = $state(null);
 
   $effect(() => {
     if (nextPuzzleStore.nextPuzzle) {
@@ -35,7 +37,21 @@
   onMount(() => {
     puzzlesStore.load();
     sourceUrlsStore.load();
-    // fetchPuzzles(sourceUrlsStore.sourceUrls);
+    try {
+      chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+        if (puzzleTabId === null) return;
+        if (changeInfo.status === 'loading') {
+          if (puzzleTabId === tabId) {
+            chrome.scripting.executeScript({
+              target: { tabId: tabId },
+              files: ['content-script.js']
+            });
+          }
+        }
+      });
+    } catch (error) {
+      console.error(error);
+    }
   });
 
   function openPuzzle() {
@@ -50,9 +66,9 @@
           active: true,
         },
         (tab) => {
-          console.log(tab);
-          chrome.scripting.executeScript({
-            target: { tabId: tab.id },
+          puzzleTabId = tab.id;
+          chrome.scripting.executescript({
+            target: { tabid: tab.id },
             files: ["content-script.js"],
           });
         },
