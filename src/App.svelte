@@ -5,7 +5,6 @@
   import nextPuzzleStore from "./lib/store/nextPuzzle.svelte";
   import { onMount } from "svelte";
   import confetti from "canvas-confetti";
-  // import './lib/injectScript.svelte.js';
   import "./lib/event.svelte.js";
 
   import Overlay from "./lib/component/Overlay.svelte";
@@ -48,6 +47,17 @@
             });
           }
         }
+      });
+      
+      chrome.tabs.onRemoved.addListener((tabId) => {
+        if (puzzleTabId === null) return;
+        if (puzzleTabId === tabId) {
+          puzzleTabId === null
+          puzzlesStore.incrementCurrentPuzzle()
+          nextPuzzleStore.nextPuzzle = true;
+          nextPuzzleStore.dnf = true
+        }
+          
       });
     } catch (error) {
       console.error(error);
