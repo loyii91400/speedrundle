@@ -29,7 +29,7 @@ function sendLose() {
 chrome.storage.local.get(['puzzles', 'currentPuzzle'], (result) => {
   if (result.puzzles != undefined && result.currentPuzzle != undefined) {
     const currentPuzzle = result.currentPuzzle
-    const puzzle = result.puzzles.filter(p => p.active).sort((a, b) => a.index - b.index)[currentPuzzle]
+    const puzzle = JSON.parse(result.puzzles).filter(p => p.active).sort((a, b) => a.index - b.index)[currentPuzzle]
     const winCheck = puzzle.winCheck
     const loseCheck = puzzle.loseCheck
 
@@ -39,7 +39,7 @@ chrome.storage.local.get(['puzzles', 'currentPuzzle'], (result) => {
         const textToCheck = Array.isArray(check.text) ? check.text : [check.text];
 
         for (const elem of document.querySelectorAll(check.query)) {
-          if (textToCheck.some(text => elem.textContent.includes(text))) {
+          if (elem.checkVisibility() && textToCheck.some(text => elem.textContent.includes(text))) {
             matches.push(elem);
           }
         }
