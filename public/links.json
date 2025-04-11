@@ -1,0 +1,65 @@
+[
+  {
+    "name": "Wordle",
+    "url": "https://www.nytimes.com/games/wordle/index.html",
+    "icon": "https://www.nytimes.com/games-assets/v2/metadata/wordle-apple-touch-icon.png?v=v2504091145",
+    "winCheck": {
+      "mutationType": "characterData",
+      "query": "h1",
+      "text": "Congratulations!"
+    },
+    "loseCheck": {
+      "mutationType": "characterData",
+      "query": "h1",
+      "text": "Thanks for playing today!"
+    }
+  },
+  {
+    "name": "Mini",
+    "url": "https://www.nytimes.com/crosswords/game/mini",
+    "icon": "https://www.nytimes.com/games-assets/v2/metadata/nyt-apple-touch-icon.png?v=v2504091256",
+    "winCheck": {
+      "mutationType": "",
+      "query": "h1",
+      "text": "Congratulations!"
+    },
+    "loseCheck": null
+  },
+  {
+    "name": "Strands",
+    "url": "https://www.nytimes.com/games/strands",
+    "icon": "https://www.nytimes.com/games-assets/v2/metadata/strands-apple-touch-icon.png?v=v2504101308",
+    "winCheck": {
+      "mutationType": "",
+      "query": "h3",
+      "text": "NEXT PUZZLE IN"
+    },
+    "loseCheck": null
+  },
+  {
+    "name": "Connections",
+    "url": "https://www.nytimes.com/games/connections",
+    "icon": "https://www.nytimes.com/games-assets/v2/metadata/connections-apple-touch-icon.png?v=v2504101308",
+    "winCheck": {
+      "mutationType": "",
+      "query": "h2",
+      "text": ["Perfect!", "Great!", "Solid!", "Phew!"]
+    },
+    "loseCheck": {
+      "mutationType": "",
+      "query": "h2",
+      "text": "Next Time!"
+    }
+  },
+  {
+    "name": "Wiki Game Daily",
+    "url": "https://www.thewikigamedaily.com",
+    "icon": "https://www.thewikigamedaily.com/favicon.png",
+    "winCheck": {
+      "mutationType": "",
+      "query": "h1",
+      "text": "Congratulations"
+    },
+    "loseCheck": null
+  }
+]
