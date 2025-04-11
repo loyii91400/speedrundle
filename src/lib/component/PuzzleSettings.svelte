@@ -1,62 +1,18 @@
 <script>
     import { onMount } from "svelte";
-  import puzzlesStore from "../store/puzzles.svelte";
+    import puzzlesStore from "../store/puzzles.svelte";
+    import { fetchPuzzles } from "../puzzleFetcher.js";
+    import sourceUrlsStore from "../store/sourceUrls.svelte";
 
-  let puzzles = $derived(puzzlesStore.puzzles);
-  let error = $state(null);
-  let urls = $state('https://raw.githubusercontent.com/loyii91400/wordleTest/refs/heads/main/links.json');
-  let showUrlInput = $state(false);
+    let puzzles = $derived(puzzlesStore.puzzles);
+    let error = $state(null);
+    let showUrlInput = $state(false);
+    let urls = $state(sourceUrlsStore.sourceUrls);
 
-  async function fetchPuzzles() {
-    try {
-      error = null;
-      const urlList = urls.split('\n').filter(url => url.trim());
-      
-      // Create a new array to store all fetched puzzles
-      let newPuzzlesArray = [];
-      
-      // Fetch puzzles from all URLs
-      for (const url of urlList) {
-        try {
-          const response = await fetch(url.trim());
-          if (!response.ok) throw new Error(`Failed to fetch from ${url}`);
-          const fetchedPuzzles = await response.json();
-          
-          // Add sourceUrl to each puzzle
-          const puzzlesWithSource = fetchedPuzzles.map(puzzle => ({ 
-            ...puzzle, 
-            sourceUrl: url.trim() 
-          }));
-          
-          newPuzzlesArray.push(...puzzlesWithSource);
-        } catch (e) {
-          error = (error ? error + '\n' : '') + `Error fetching ${url}`;
-        }
-      }
-      
-      // Update active status based on current puzzles
-      newPuzzlesArray = newPuzzlesArray.map(newPuzzle => {
-        // Find a matching puzzle in the current store
-        const existingPuzzle = puzzlesStore.puzzles.find(p => 
-          p.name === newPuzzle.name && p.url === newPuzzle.url
-        );
-        
-        // If a matching puzzle exists, preserve its active status
-        return existingPuzzle ? { ...newPuzzle, active: existingPuzzle.active } : { ...newPuzzle, active: true };
-      });
-      
-      // Remove duplicates and set as new puzzles
-      puzzlesStore.puzzles = newPuzzlesArray.filter((puzzle, index, self) => 
-        index === self.findIndex(p => p.name === puzzle.name && p.url === puzzle.url)
-      );
-    } catch (e) {
-      error = e.message;
-    }
-  }
-
-  onMount(() => {
-    fetchPuzzles();
-  });
+    onMount(async () => {
+        const result = await fetchPuzzles(urls);
+        error = result.error;
+    });
 </script>
 
 <div class="p-4">
@@ -66,6 +22,7 @@
     <button 
       class="text-gray-600 hover:text-gray-800 focus:outline-none"
       onclick={() => showUrlInput = !showUrlInput}
+      aria-label="Toggle URL input visibility"
     >
       <svg 
         xmlns="http://www.w3.org/2000/svg" 
@@ -96,7 +53,11 @@
         placeholder="Enter URLs, one per line"
       ></textarea>
       <button 
-        onclick={fetchPuzzles}
+        onclick={async () => {
+            sourceUrlsStore.sourceUrls = urls;
+            const result = await fetchPuzzles(urls);
+            error = result.error;
+        }}
         class="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       >
         Fetch Puzzles
@@ -109,22 +70,27 @@
   {/if}
 
   {#if puzzles.length > 0}
-    <ul class="space-y-2">
-      {#each puzzles as puzzle}
-        <li class="py-2 border-b border-gray-200 last:border-0 flex items-center gap-3">
-          <input
-            type="checkbox"
-            class="w-4 h-4 text-blue-600"
-            checked={puzzle.active}
-            onchange={(e) => {
-              puzzlesStore.puzzles = puzzlesStore.puzzles.map((p) => p === puzzle ? { ...p, active: e.target.checked } : p);
-            }}
-          />
-          <span>{puzzle.name}</span>
-        </li>
-      {/each}
-    </ul>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+      <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+        {#each puzzles as puzzle}
+          <li class="px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <div class="flex items-center space-x-3">
+              <input
+                type="checkbox"
+                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                checked={puzzle.active}
+                onchange={(e) => {
+                  puzzlesStore.puzzles = puzzlesStore.puzzles.map((p) => p === puzzle ? { ...p, active: e.target.checked } : p);
+                }}
+              />
+      <img width="32" height="32" src={puzzle.icon} alt={puzzle.name} />
+              <span class="text-gray-800 dark:text-gray-200">{puzzle.name}</span>
+            </div>
+          </li>
+        {/each}
+      </ul>
+    </div>
   {:else}
-    <p class="text-gray-500">Loading puzzles...</p>
+    <p class="text-gray-500 dark:text-gray-400 text-center italic py-4">Loading puzzles...</p>
   {/if}
 </div>

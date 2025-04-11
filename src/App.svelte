@@ -1,24 +1,30 @@
 <script>
-  import ThemePicker from './lib/component/ThemePicker.svelte';
-  import Timer from './lib/component/Timer.svelte';
-  import puzzlesStore from './lib/store/puzzles.svelte.js';
-  import nextPuzzleStore from './lib/store/nextPuzzle.svelte';
-  import { onMount } from 'svelte';
-  import './lib/injectScript.svelte.js';
-  import './lib/event.svelte.js';
+  import ThemePicker from "./lib/component/ThemePicker.svelte";
+  import Timer from "./lib/component/Timer.svelte";
+  import puzzlesStore from "./lib/store/puzzles.svelte.js";
+  import nextPuzzleStore from "./lib/store/nextPuzzle.svelte";
+  import { onMount } from "svelte";
+  // import './lib/injectScript.svelte.js';
+  import "./lib/event.svelte.js";
 
-  import Overlay from './lib/component/Overlay.svelte';
-    import PuzzleSettings from './lib/component/PuzzleSettings.svelte';
-    import HowToPlay from './lib/component/HowToPlay.svelte';
+  import Overlay from "./lib/component/Overlay.svelte";
+  import PuzzleSettings from "./lib/component/PuzzleSettings.svelte";
+  import HowToPlay from "./lib/component/HowToPlay.svelte";
+  import PuzzleList from "./lib/component/PuzzleList.svelte";
+  import Share from "./lib/component/Share.svelte";
+  import sourceUrlsStore from "./lib/store/sourceUrls.svelte";
+  // import { fetchPuzzles } from './lib/puzzleFetcher';
+  // import LinkOpener from './lib/component/LinkOpener.svelte';
   let isSettingsOverlayOpen = $state(false);
   let isHowToPlayOverlayOpen = $state(false);
+  let isShareOverlayOpen = $state(false);
 
   let timerRef = $state(null);
   let currentPuzzle = $derived(puzzlesStore.currentPuzzle);
   let splits = $state([]);
   let puzzles = $derived(puzzlesStore.activePuzzles);
   let finishTime = $state(null);
-  
+
   $effect(() => {
     if (nextPuzzleStore.nextPuzzle) {
       split();
@@ -27,21 +33,32 @@
 
   onMount(() => {
     puzzlesStore.load();
+    sourceUrlsStore.load();
+    // fetchPuzzles(sourceUrlsStore.sourceUrls);
   });
 
-
-  function openPuzzle() { 
+  function openPuzzle() {
     if (currentPuzzle >= puzzles.length) {
-      stop()
+      stop();
       return;
     }
     try {
-      chrome.tabs.create({
-        url: puzzlesStore.activePuzzles[currentPuzzle].url,
-        active: true
-      })
+      chrome.tabs.create(
+        {
+          url: puzzlesStore.activePuzzles[currentPuzzle].url,
+          active: true,
+        },
+        (tab) => {
+          console.log(tab);
+          chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: ["content-script.js"],
+          });
+        },
+      );
     } catch (error) {
-      window.open(puzzlesStore.activePuzzles[currentPuzzle].url, '_blank');
+      console.log(error);
+      window.open(puzzlesStore.activePuzzles[currentPuzzle].url, "_blank");
     }
   }
 
@@ -50,10 +67,10 @@
     timerRef.start();
     openPuzzle();
   }
-  
+
   function split() {
     if (nextPuzzleStore.dnf) {
-      splits = [...splits, 'DNF'];
+      splits = [...splits, "DNF"];
       nextPuzzleStore.dnf = false;
     } else {
       splits = [...splits, timerRef.getFormattedTime()];
@@ -62,7 +79,7 @@
     nextPuzzleStore.nextPuzzle = false;
     openPuzzle();
   }
-  
+
   function manualSplit() {
     puzzlesStore.incrementCurrentPuzzle();
     split();
@@ -75,34 +92,60 @@
 
   function reset() {
     timerRef.reset();
-    puzzlesStore.resetCurrentPuzzle()
+    puzzlesStore.resetCurrentPuzzle();
     splits = [];
     finishTime = null;
   }
 </script>
 
-<div class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
+<div
+  class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300"
+>
   <div class="fixed top-4 right-2">
     <div class="flex flex-col gap-2">
       <ThemePicker />
 
-      <button 
-        onclick={() => isSettingsOverlayOpen = true} 
+      <button
+        onclick={() => (isSettingsOverlayOpen = true)}
         class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
         aria-label="Toggle theme"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" class="text-gray-900 dark:text-white">
-          <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-          <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10.47 4.32c.602-1.306 2.458-1.306 3.06 0l.218.473a1.684 1.684 0 0 0 2.112.875l.49-.18c1.348-.498 2.66.814 2.162 2.163l-.18.489a1.684 1.684 0 0 0 .875 2.112l.474.218c1.305.602 1.305 2.458 0 3.06l-.474.218a1.684 1.684 0 0 0-.875 2.112l.18.49c.498 1.348-.814 2.66-2.163 2.162l-.489-.18a1.684 1.684 0 0 0-2.112.875l-.218.473c-.602 1.306-2.458 1.306-3.06 0l-.218-.473a1.684 1.684 0 0 0-2.112-.875l-.49.18c-1.348.498-2.66-.814-2.163-2.163l.181-.489a1.684 1.684 0 0 0-.875-2.112l-.474-.218c-1.305-.602-1.305-2.458 0-3.06l.474-.218a1.684 1.684 0 0 0 .875-2.112l-.18-.49c-.498-1.348.814-2.66 2.163-2.163l.489.181a1.684 1.684 0 0 0 2.112-.875l.218-.474Z"/>
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          class="text-gray-900 dark:text-white"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+          />
+          <path
+            stroke="currentColor"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M10.47 4.32c.602-1.306 2.458-1.306 3.06 0l.218.473a1.684 1.684 0 0 0 2.112.875l.49-.18c1.348-.498 2.66.814 2.162 2.163l-.18.489a1.684 1.684 0 0 0 .875 2.112l.474.218c1.305.602 1.305 2.458 0 3.06l-.474.218a1.684 1.684 0 0 0-.875 2.112l.18.49c.498 1.348-.814 2.66-2.163 2.162l-.489-.18a1.684 1.684 0 0 0-2.112.875l-.218.473c-.602 1.306-2.458 1.306-3.06 0l-.218-.473a1.684 1.684 0 0 0-2.112-.875l-.49.18c-1.348.498-2.66-.814-2.163-2.163l.181-.489a1.684 1.684 0 0 0-.875-2.112l-.474-.218c-1.305-.602-1.305-2.458 0-3.06l.474-.218a1.684 1.684 0 0 0 .875-2.112l-.18-.49c-.498-1.348.814-2.66 2.163-2.163l.489.181a1.684 1.684 0 0 0 2.112-.875l.218-.474Z"
+          />
         </svg>
       </button>
 
-      <button 
-        onclick={() => isHowToPlayOverlayOpen = true} 
+      <button
+        onclick={() => (isHowToPlayOverlayOpen = true)}
         class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
         aria-label="How to play"
       >
-        <svg width="24" height="24" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-gray-900 dark:text-white">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 15 15"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          class="text-gray-900 dark:text-white"
+        >
           <path
             fill-rule="evenodd"
             clip-rule="evenodd"
@@ -114,43 +157,55 @@
     </div>
   </div>
   <div class="flex flex-col gap-4 py-32 h-screen items-center">
-    <div class="text-4xl font-bold text-gray-800 dark:text-gray-100">Speedrundle</div>
+    <div class="text-4xl font-bold text-gray-800 dark:text-gray-100">
+      Speedrundle
+    </div>
     <Timer bind:this={timerRef} />
     <div class="flex gap-4">
       {#if timerRef?.getIsRunning()}
-        <button class="w-24 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md" onclick={manualSplit}>Split</button>
+        <button
+          class="w-24 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md"
+          onclick={manualSplit}>Split</button
+        >
       {:else}
-        <button class="w-24 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md" onclick={start}>Start</button>
+        <button
+          class="w-24 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md"
+          onclick={start}>Start</button
+        >
       {/if}
-      <button class="w-24 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md" onclick={reset}>Reset</button>
+      <button
+        class="w-24 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md"
+        onclick={reset}>Reset</button
+      >
     </div>
-    <div class="flex flex-col gap-2">
-      <!-- <pre>{JSON.stringify(puzzles, null, 2)}</pre> -->
-      {#each puzzles as puzzle, index}
-        <div class="flex items-center gap-2">
-          <img width="32" height="32" src={puzzle.icon} alt={puzzle.name} />
-          <a href={puzzle.url} target="_blank" rel="noopener noreferrer">{puzzle.name}</a>
-          <div class="{splits[index] === 'DNF' ? 'text-red-500' : 'text-green-500'}">{splits[index] ?? '' }</div>
-        </div>
-      {/each}
-    </div>
+    <PuzzleList {splits} allowReorder={!timerRef?.getIsRunning()} />
     {#if finishTime != null}
-      <div>Share</div>
+      <button class="cursor-pointer" onclick={() => (isShareOverlayOpen = true)}
+        >Share your score</button
+      >
     {/if}
   </div>
 </div>
 
-<Overlay 
-    isOpen={isSettingsOverlayOpen} 
-    onClose={() => isSettingsOverlayOpen = false}
+<Overlay
+  isOpen={isSettingsOverlayOpen}
+  onClose={() => (isSettingsOverlayOpen = false)}
 >
   <PuzzleSettings />
 </Overlay>
 
-<Overlay 
-    isOpen={isHowToPlayOverlayOpen} 
-    onClose={() => isHowToPlayOverlayOpen = false}
+<Overlay
+  isOpen={isHowToPlayOverlayOpen}
+  onClose={() => (isHowToPlayOverlayOpen = false)}
 >
   <HowToPlay />
 </Overlay>
-    
+
+<Overlay
+  isOpen={isShareOverlayOpen}
+  onClose={() => (isShareOverlayOpen = false)}
+>
+  <Share {splits} {finishTime} {puzzles} />
+</Overlay>
+
+<!-- <LinkOpener /> -->

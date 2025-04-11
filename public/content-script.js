@@ -1,69 +1,72 @@
 console.log("Content script loaded");
 
-const root = document.getRootNode()
+const documRoot = document.getRootNode()
+let searching = true;
 
 function sendWin() {
-  chrome.runtime.sendMessage({
-    type: 'GAME_FINISHED', 
-    data: {
-      status: 'WIN'
-    }
-  });
+  if (searching) {
+    chrome.runtime.sendMessage({
+      type: 'GAME_FINISHED',
+      data: {
+        status: 'WIN'
+      }
+    });
+  }
+  searching = false;
 }
 function sendLose() {
-  chrome.runtime.sendMessage({
-    type: 'GAME_FINISHED', 
-    data: {
-      status: 'LOSE'
-    }
-  });
+  if (searching) {
+    chrome.runtime.sendMessage({
+      type: 'GAME_FINISHED',
+      data: {
+        status: 'LOSE'
+      }
+    });
+  }
+  searching = false;
 }
 
 chrome.storage.local.get(['puzzles', 'currentPuzzle'], (result) => {
   if (result.puzzles != undefined && result.currentPuzzle != undefined) {
     const currentPuzzle = result.currentPuzzle
-    const puzzle = result.puzzles[currentPuzzle]
+    const puzzle = result.puzzles.filter(p => p.active).sort((a, b) => a.index - b.index)[currentPuzzle]
     const winCheck = puzzle.winCheck
     const loseCheck = puzzle.loseCheck
 
-    const cb = (mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'characterData' && (winCheck.type === 'characterData' || loseCheck.type === 'characterData')) {
-          if (mutation.target.data === winCheck.newValue) {
-            if ( winCheck.oldValue != undefined || winCheck.oldValue != null)
-            {
-              if (mutation.target.oldValue === winCheck.oldValue) {
-                console.log('Win!')
-                sendWin()
-              }
-            } else {
-              console.log('Win!')
-              sendWin()
-            }
-          }
+    function checkGameCondition(check, mutation, sendFunction, logMessage) {
+      if (check.mutationType === '' || mutation.type === check.mutationType) {
+        const matches = [];
+        const textToCheck = Array.isArray(check.text) ? check.text : [check.text];
 
-          if (mutation.target.data === loseCheck.newValue) {
-            if ( loseCheck.oldValue != undefined || loseCheck.oldValue != null)
-            {
-              if (mutation.target.oldValue === loseCheck.oldValue) {
-                console.log('Lose!')
-                sendLose()
-              }
-            } else {
-              console.log('Lose!')
-              sendLose()
-            }
+        for (const elem of document.querySelectorAll(check.query)) {
+          if (textToCheck.some(text => elem.textContent.includes(text))) {
+            matches.push(elem);
           }
+        }
+
+        if (matches.length > 0) {
+          console.log(logMessage + '!');
+          sendFunction();
+        }
+      }
+    }
+
+    const cb = (mutations) => {
+      if (!searching) return;
+      mutations.forEach((mutation) => {
+        checkGameCondition(winCheck, mutation, sendWin, 'Win');
+        if (loseCheck !== null) {
+          checkGameCondition(loseCheck, mutation, sendLose, 'Lose');
         }
       });
     };
 
     const observer = new MutationObserver(cb)
-    observer.observe(root, { 
-      childList: true, 
-      subtree: true, 
-      characterData: winCheck.type === 'characterData' || loseCheck.type === 'characterData', 
-      characterDataOldValue: winCheck.type === 'characterData' || loseCheck.type === 'characterData', 
+    observer.observe(documRoot, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      characterDataOldValue: true,
     })
-  } 
+  }
 });

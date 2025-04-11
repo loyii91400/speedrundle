@@ -14,7 +14,11 @@
   const milliseconds = $derived(time % 1000);
   
   function getFormattedTime() {
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+    if (hours > 0) {
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+    } else {
+      return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+    }
   }
 
   function start() {
@@ -69,4 +73,3 @@
   <span class="seconds text-4xl text-green-600">{seconds.toString().padStart(2, '0')}</span>
   <span class="milliseconds text-green-700">.{milliseconds.toString().padStart(3, '0')}</span>
 </div>
-

@@ -1,69 +1,108 @@
 console.log("Content script loaded");
 
-const root = document.getRootNode()
+const documRoot = document.getRootNode()
+let searching = true;
 
 function sendWin() {
-  chrome.runtime.sendMessage({
-    type: 'GAME_FINISHED', 
-    data: {
-      status: 'WIN'
-    }
-  });
+  if (searching) {
+    chrome.runtime.sendMessage({
+      type: 'GAME_FINISHED',
+      data: {
+        status: 'WIN'
+      }
+    });
+  }
+  searching = false;
 }
 function sendLose() {
-  chrome.runtime.sendMessage({
-    type: 'GAME_FINISHED', 
-    data: {
-      status: 'LOSE'
-    }
-  });
+  if (searching) {
+    chrome.runtime.sendMessage({
+      type: 'GAME_FINISHED',
+      data: {
+        status: 'LOSE'
+      }
+    });
+  }
+  searching = false;
 }
 
 chrome.storage.local.get(['puzzles', 'currentPuzzle'], (result) => {
   if (result.puzzles != undefined && result.currentPuzzle != undefined) {
     const currentPuzzle = result.currentPuzzle
-    const puzzle = result.puzzles[currentPuzzle]
+    const puzzle = result.puzzles.filter(p => p.active).sort((a, b) => a.index - b.index)[currentPuzzle]
     const winCheck = puzzle.winCheck
     const loseCheck = puzzle.loseCheck
 
     const cb = (mutations) => {
+      if (!searching) return;
       mutations.forEach((mutation) => {
-        if (mutation.type === 'characterData' && (winCheck.type === 'characterData' || loseCheck.type === 'characterData')) {
-          if (mutation.target.data === winCheck.newValue) {
-            if ( winCheck.oldValue != undefined || winCheck.oldValue != null)
-            {
-              if (mutation.target.oldValue === winCheck.oldValue) {
-                console.log('Win!')
-                sendWin()
-              }
-            } else {
-              console.log('Win!')
-              sendWin()
+        if (mutation.type === winCheck.mutationType) {
+          const matches = [];
+
+          for (const elem of document.querySelectorAll(winCheck.query)) {
+            if (elem.textContent.includes(winCheck.text)) {
+              matches.push(elem);
             }
           }
 
-          if (mutation.target.data === loseCheck.newValue) {
-            if ( loseCheck.oldValue != undefined || loseCheck.oldValue != null)
-            {
-              if (mutation.target.oldValue === loseCheck.oldValue) {
-                console.log('Lose!')
-                sendLose()
-              }
-            } else {
-              console.log('Lose!')
-              sendLose()
+          if (matches.length > 0) {
+            console.log('Win!')
+            sendWin()
+          }
+        } else if (winCheck.mutationType === '') {
+          const matches = [];
+
+          for (const elem of document.querySelectorAll(winCheck.query)) {
+            if (elem.textContent.includes(winCheck.text)) {
+              matches.push(elem);
             }
+          }
+
+          if (matches.length > 0) {
+            console.log('Win!')
+            sendWin()
+          }  
+        }
+
+        if (loseCheck !== null && mutation.type === loseCheck.mutationType) {
+          const matches = [];
+
+          console.log(loseCheck.query)
+          console.log(loseCheck.text)
+          for (const elem of document.querySelectorAll(loseCheck.query)) {
+            if (elem.textContent.includes(loseCheck.text)) {
+              matches.push(elem);
+            }
+          }
+          console.log(matches)
+
+          if (matches.length > 0) {
+            console.log('Lose!')
+            sendLose()
+          }
+        } else if (loseCheck !== null && loseCheck.mutationType === '') {
+          const matches = [];
+          
+          for (const elem of document.querySelectorAll(loseCheck.query)) {
+            if (elem.textContent.includes(loseCheck.text)) {
+              matches.push(elem);
+            }
+          }
+
+          if (matches.length > 0) {
+            console.log('Lose!')
+            sendLose()
           }
         }
       });
     };
 
     const observer = new MutationObserver(cb)
-    observer.observe(root, { 
-      childList: true, 
-      subtree: true, 
-      characterData: winCheck.type === 'characterData' || loseCheck.type === 'characterData', 
-      characterDataOldValue: winCheck.type === 'characterData' || loseCheck.type === 'characterData', 
+    observer.observe(documRoot, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      characterDataOldValue: true,
     })
-  } 
+  }
 });
