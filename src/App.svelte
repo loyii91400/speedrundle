@@ -96,6 +96,10 @@
   }
 
   function split() {
+    if (!timerRef.getIsRunning()) {
+      puzzlesStore.resetCurrentPuzzle();
+      return;
+    }
     if (nextPuzzleStore.dnf) {
       splits = [...splits, "DNF"];
       nextPuzzleStore.dnf = false;
