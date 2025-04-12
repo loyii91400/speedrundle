@@ -53,6 +53,9 @@
 </script>
 
 <div class="flex flex-col gap-2">
+  {#if puzzleStore.activePuzzles.length === 0}
+    <div class="text-gray-500">First time here? Click the settings icon.</div>
+  {/if}
   {#each puzzleStore.activePuzzles as puzzle, index}
     <div 
       class="flex items-center gap-2 w-64 border border-gray-300 p-2 rounded"
