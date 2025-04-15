@@ -1,6 +1,6 @@
-console.log("Content script loaded");
+console.log('Content script loaded');
 
-const documRoot = document.getRootNode()
+const documRoot = document.getRootNode();
 let searching = true;
 
 function sendWin() {
@@ -8,8 +8,8 @@ function sendWin() {
     chrome.runtime.sendMessage({
       type: 'GAME_FINISHED',
       data: {
-        status: 'WIN'
-      }
+        status: 'WIN',
+      },
     });
   }
   searching = false;
@@ -19,8 +19,8 @@ function sendLose() {
     chrome.runtime.sendMessage({
       type: 'GAME_FINISHED',
       data: {
-        status: 'LOSE'
-      }
+        status: 'LOSE',
+      },
     });
   }
   searching = false;
@@ -28,18 +28,25 @@ function sendLose() {
 
 chrome.storage.local.get(['puzzles', 'currentPuzzle'], (result) => {
   if (result.puzzles != undefined && result.currentPuzzle != undefined) {
-    const currentPuzzle = result.currentPuzzle
-    const puzzle = JSON.parse(result.puzzles).filter(p => p.active).sort((a, b) => a.index - b.index)[currentPuzzle]
-    const winCheck = puzzle.winCheck
-    const loseCheck = puzzle.loseCheck
+    const currentPuzzle = result.currentPuzzle;
+    const puzzle = JSON.parse(result.puzzles)
+      .filter((p) => p.active)
+      .sort((a, b) => a.index - b.index)[currentPuzzle];
+    const winCheck = puzzle.winCheck;
+    const loseCheck = puzzle.loseCheck;
 
     function checkGameCondition(check, mutation, sendFunction, logMessage) {
       if (check.mutationType === '' || mutation.type === check.mutationType) {
         const matches = [];
-        const textToCheck = Array.isArray(check.text) ? check.text : [check.text];
+        const textToCheck = Array.isArray(check.text)
+          ? check.text
+          : [check.text];
 
         for (const elem of document.querySelectorAll(check.query)) {
-          if (elem.checkVisibility() && textToCheck.some(text => elem.textContent.includes(text))) {
+          if (
+            elem.checkVisibility() &&
+            textToCheck.some((text) => elem.textContent.includes(text))
+          ) {
             matches.push(elem);
           }
         }
@@ -61,12 +68,12 @@ chrome.storage.local.get(['puzzles', 'currentPuzzle'], (result) => {
       });
     };
 
-    const observer = new MutationObserver(cb)
+    const observer = new MutationObserver(cb);
     observer.observe(documRoot, {
       childList: true,
       subtree: true,
       characterData: true,
       characterDataOldValue: true,
-    })
+    });
   }
 });

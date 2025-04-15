@@ -3,10 +3,11 @@
     import puzzlesStore from "../store/puzzles.svelte";
     import { fetchPuzzles } from "../puzzleFetcher.js";
     import sourceUrlsStore from "../store/sourceUrls.svelte";
+    import GameSettings from "./GameSettings.svelte";
 
     let puzzles = $derived(puzzlesStore.puzzles);
     let error = $state(null);
-    let showUrlInput = $state(false);
+    let showAdvancedSettings = $state(false);
     let urls = $state(sourceUrlsStore.sourceUrls);
 
     onMount(async () => {
@@ -21,12 +22,12 @@
     <span class="text-sm text-gray-600 mr-2">Advanced settings</span>
     <button 
       class="text-gray-600 hover:text-gray-800 focus:outline-none"
-      onclick={() => showUrlInput = !showUrlInput}
-      aria-label="Toggle URL input visibility"
+      onclick={() => showAdvancedSettings = !showAdvancedSettings}
+      aria-label="Toggle Advanced Settings"
     >
       <svg 
         xmlns="http://www.w3.org/2000/svg" 
-        class="h-6 w-6 transition-transform {showUrlInput ? 'rotate-180' : ''}" 
+        class="h-6 w-6 transition-transform {showAdvancedSettings ? 'rotate-180' : ''}" 
         fill="none" 
         viewBox="0 0 24 24" 
         stroke="currentColor"
@@ -41,7 +42,7 @@
     </button>
   </div>
 
-  {#if showUrlInput}
+  {#if showAdvancedSettings}
     <div class="mb-4">
       <label class="block text-sm font-medium text-gray-700 mb-2" for="urls">
         Puzzle URLs (one per line)
@@ -63,6 +64,7 @@
         Fetch Puzzles
       </button>
     </div>
+		<GameSettings/>
   {/if}
   
   {#if error}

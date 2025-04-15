@@ -21,14 +21,16 @@ function createSourceUrls() {
         if (savedSourceUrls) {
           sourceUrls = JSON.parse(savedSourceUrls);
         } else {
-          sourceUrls = 'https://raw.githubusercontent.com/loyii91400/speedrundlePuzzles/refs/heads/main/links.json';
+          sourceUrls =
+            'https://raw.githubusercontent.com/loyii91400/speedrundlePuzzles/refs/heads/main/links.json';
         }
-     } else {
+      } else {
         chrome.storage.local.get(['sourceUrls'], (result) => {
           if (result.sourceUrls) {
             sourceUrls = result.sourceUrls;
           } else {
-            sourceUrls = 'https://raw.githubusercontent.com/loyii91400/speedrundlePuzzles/refs/heads/main/links.json';
+            sourceUrls =
+              'https://raw.githubusercontent.com/loyii91400/speedrundlePuzzles/refs/heads/main/links.json';
           }
         });
       }
@@ -39,9 +41,9 @@ function createSourceUrls() {
       } else {
         chrome.storage.local.set({ sourceUrls: sourceUrls });
       }
-    }
+    },
   };
 }
 
 const sourceUrlsStore = createSourceUrls();
-export default sourceUrlsStore
+export default sourceUrlsStore;

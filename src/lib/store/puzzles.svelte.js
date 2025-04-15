@@ -1,4 +1,4 @@
-// @class puzzle 
+// @class puzzle
 // @field name string - The name of the puzzle
 // @field sourceUrl string - The url of the source of the puzzle
 // @field url string - The url to the puzzle
@@ -23,7 +23,7 @@ function createPuzzles() {
       return puzzles;
     },
     get activePuzzles() {
-      return puzzles.filter(p => p.active).sort((a, b) => a.index - b.index);
+      return puzzles.filter((p) => p.active).sort((a, b) => a.index - b.index);
     },
     set puzzles(value) {
       puzzles = value;
@@ -51,7 +51,7 @@ function createPuzzles() {
       this.save();
     },
     removePuzzle: (puzzleUrl) => {
-      puzzles = puzzles.filter(p => p.url !== puzzleUrl);
+      puzzles = puzzles.filter((p) => p.url !== puzzleUrl);
       this.save();
     },
     clearPuzzles: () => {
@@ -68,8 +68,7 @@ function createPuzzles() {
         chrome.storage.local.get(['puzzles', 'currentPuzzle'], (result) => {
           if (result.puzzles) {
             puzzles = JSON.parse(result.puzzles);
-            console.log(puzzles)
-
+            console.log(puzzles);
           }
         });
       }
@@ -78,13 +77,13 @@ function createPuzzles() {
       if (isDebug) {
         localStorage.setItem('puzzles', JSON.stringify(puzzles));
       } else {
-        console.log('saving', puzzles, currentPuzzle)
+        console.log('saving', puzzles, currentPuzzle);
         chrome.storage.local.set({ puzzles: JSON.stringify(puzzles) });
         chrome.storage.local.set({ currentPuzzle });
       }
-    }
+    },
   };
 }
 
 const puzzlesStore = createPuzzles();
-export default puzzlesStore
+export default puzzlesStore;

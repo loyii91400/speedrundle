@@ -1,18 +1,19 @@
 <script>
-  import ThemePicker from "./lib/component/ThemePicker.svelte";
-  import Timer from "./lib/component/Timer.svelte";
-  import puzzlesStore from "./lib/store/puzzles.svelte.js";
-  import nextPuzzleStore from "./lib/store/nextPuzzle.svelte";
-  import { onMount } from "svelte";
-  import confetti from "canvas-confetti";
-  import "./lib/event.svelte.js";
+  import ThemePicker from './lib/component/ThemePicker.svelte';
+  import Timer from './lib/component/Timer.svelte';
+  import puzzlesStore from './lib/store/puzzles.svelte.js';
+  import nextPuzzleStore from './lib/store/nextPuzzle.svelte';
+  import generalSettingsStore from './lib/store/generalSettings.svelte';
+  import { onMount } from 'svelte';
+  import confetti from 'canvas-confetti';
+  import './lib/event.svelte.js';
 
-  import Overlay from "./lib/component/Overlay.svelte";
-  import PuzzleSettings from "./lib/component/PuzzleSettings.svelte";
-  import HowToPlay from "./lib/component/HowToPlay.svelte";
-  import PuzzleList from "./lib/component/PuzzleList.svelte";
-  import Share from "./lib/component/Share.svelte";
-  import sourceUrlsStore from "./lib/store/sourceUrls.svelte";
+  import Overlay from './lib/component/Overlay.svelte';
+  import PuzzleSettings from './lib/component/PuzzleSettings.svelte';
+  import HowToPlay from './lib/component/HowToPlay.svelte';
+  import PuzzleList from './lib/component/PuzzleList.svelte';
+  import Share from './lib/component/Share.svelte';
+  import sourceUrlsStore from './lib/store/sourceUrls.svelte';
   // import { fetchPuzzles } from './lib/puzzleFetcher';
   // import LinkOpener from './lib/component/LinkOpener.svelte';
   let isSettingsOverlayOpen = $state(false);
@@ -24,8 +25,9 @@
   let splits = $state([]);
   let puzzles = $derived(puzzlesStore.activePuzzles);
   let finishTime = $state(null);
-  
+
   let puzzleTabId = $state(null);
+  let pauseTabId = $state(null);
 
   $effect(() => {
     if (nextPuzzleStore.nextPuzzle) {
@@ -36,28 +38,43 @@
   onMount(() => {
     puzzlesStore.load();
     sourceUrlsStore.load();
+    generalSettingsStore.load();
+
     try {
       chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-        if (puzzleTabId === null) return;
+        if (puzzleTabId === null && pauseTabId === null) return;
         if (changeInfo.status === 'loading') {
           if (puzzleTabId === tabId) {
             chrome.scripting.executeScript({
               target: { tabId: tabId },
-              files: ['content-script.js']
+              files: ['content-script.js'],
             });
           }
         }
       });
-      
-      chrome.tabs.onRemoved.addListener((tabId) => {
-        if (puzzleTabId === null) return;
-        if (puzzleTabId === tabId) {
-          puzzleTabId === null
-          puzzlesStore.incrementCurrentPuzzle()
-          nextPuzzleStore.nextPuzzle = true;
-          nextPuzzleStore.dnf = true
+
+      chrome.tabs.onActivated.addListener((activeInfo) => {
+        const tabId = activeInfo.tabId;
+        if (puzzleTabId === tabId && timerRef?.getIsPaused()) {
+          resume();
         }
-          
+        if (pauseTabId === tabId && !timerRef?.getIsPaused()) {
+          pause();
+        }
+      });
+
+      chrome.tabs.onRemoved.addListener((tabId) => {
+        if (puzzleTabId === null && pauseTabId === null) return;
+        if (puzzleTabId === tabId) {
+          puzzleTabId === null;
+          puzzlesStore.incrementCurrentPuzzle();
+          nextPuzzleStore.nextPuzzle = true;
+          nextPuzzleStore.dnf = true;
+        }
+        if (pauseTabId === tabId) {
+          pauseTabId = null;
+          resume();
+        }
       });
     } catch (error) {
       console.error(error);
@@ -79,13 +96,13 @@
           puzzleTabId = tab.id;
           chrome.scripting.executescript({
             target: { tabid: tab.id },
-            files: ["content-script.js"],
+            files: ['content-script.js'],
           });
-        },
+        }
       );
     } catch (error) {
       console.log(error);
-      window.open(puzzlesStore.activePuzzles[currentPuzzle].url, "_blank");
+      window.open(puzzlesStore.activePuzzles[currentPuzzle].url, '_blank');
     }
   }
 
@@ -101,7 +118,7 @@
       return;
     }
     if (nextPuzzleStore.dnf) {
-      splits = [...splits, "DNF"];
+      splits = [...splits, 'DNF'];
       nextPuzzleStore.dnf = false;
     } else {
       splits = [...splits, timerRef.getFormattedTime()];
@@ -119,7 +136,9 @@
   function stop() {
     timerRef.stop();
     finishTime = timerRef.getFormattedTime();
-    confetti();
+    if (generalSettingsStore.isConfetti) {
+      confetti();
+    }
   }
 
   function reset() {
@@ -127,6 +146,42 @@
     puzzlesStore.resetCurrentPuzzle();
     splits = [];
     finishTime = null;
+  }
+
+  function pause() {
+    timerRef.pause();
+    try {
+      if (pauseTabId != null) {
+        try {
+          chrome.tabs.update(pauseTabId, { active: true });
+        } catch (e) {
+          chrome.tabs.create(
+            { url: chrome.runtime.getURL('paused.html') },
+            (tab) => {
+              pauseTabId = tab.id;
+            }
+          );
+        }
+      } else {
+        chrome.tabs.create(
+          { url: chrome.runtime.getURL('paused.html') },
+          (tab) => {
+            pauseTabId = tab.id;
+          }
+        );
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  function resume() {
+    timerRef.resume();
+    try {
+      chrome.tabs.update(puzzleTabId, { active: true });
+    } catch (e) {
+      console.log(e);
+    }
   }
 </script>
 
@@ -210,6 +265,19 @@
         onclick={reset}>Reset</button
       >
     </div>
+    {#if generalSettingsStore.isAllowPause && timerRef?.getIsRunning()}
+      {#if !timerRef?.getIsPaused()}
+        <button
+          class="w-24 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md"
+          onclick={pause}>Pause</button
+        >
+      {:else}
+        <button
+          class="w-24 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md"
+          onclick={resume}>Resume</button
+        >
+      {/if}
+    {/if}
     <PuzzleList {splits} allowReorder={!timerRef?.getIsRunning()} />
     {#if finishTime != null}
       <button class="cursor-pointer" onclick={() => (isShareOverlayOpen = true)}
@@ -240,4 +308,5 @@
   <Share {splits} {finishTime} {puzzles} />
 </Overlay>
 
+<!-- for debug -->
 <!-- <LinkOpener /> -->
