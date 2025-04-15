@@ -7,6 +7,9 @@
   import { onMount } from 'svelte';
   import confetti from 'canvas-confetti';
   import './lib/event.svelte.js';
+  import { getIsDarkMode } from './lib/store/theme.svelte.js';
+
+  let isDarkMode = $derived(getIsDarkMode());
 
   import Overlay from './lib/component/Overlay.svelte';
   import PuzzleSettings from './lib/component/PuzzleSettings.svelte';
@@ -67,9 +70,7 @@
         if (puzzleTabId === null && pauseTabId === null) return;
         if (puzzleTabId === tabId) {
           puzzleTabId === null;
-          puzzlesStore.incrementCurrentPuzzle();
-          nextPuzzleStore.nextPuzzle = true;
-          nextPuzzleStore.dnf = true;
+          dnfCurrentPuzzle();
         }
         if (pauseTabId === tabId) {
           pauseTabId = null;
@@ -81,6 +82,11 @@
     }
   });
 
+  function dnfCurrentPuzzle() {
+    puzzlesStore.incrementCurrentPuzzle();
+    nextPuzzleStore.nextPuzzle = true;
+    nextPuzzleStore.dnf = true;
+  }
   function openPuzzle() {
     if (currentPuzzle >= puzzles.length) {
       stop();
@@ -94,12 +100,15 @@
         },
         (tab) => {
           puzzleTabId = tab.id;
-          chrome.scripting.executescript({
-            target: { tabid: tab.id },
-            files: ['content-script.js'],
-          });
+          // chrome.scripting.executeScript({
+          //   target: { tabId: tab.id },
+          //   files: ['content-script.js'],
+          // });
         }
       );
+      if (timerRef.getIsPaused()) {
+        resume();
+      }
     } catch (error) {
       console.log(error);
       window.open(puzzlesStore.activePuzzles[currentPuzzle].url, '_blank');
@@ -145,6 +154,7 @@
     timerRef.reset();
     puzzlesStore.resetCurrentPuzzle();
     splits = [];
+    puzzleTabId = null;
     finishTime = null;
   }
 
@@ -156,7 +166,9 @@
           chrome.tabs.update(pauseTabId, { active: true });
         } catch (e) {
           chrome.tabs.create(
-            { url: chrome.runtime.getURL('paused.html') },
+            {
+              url: `${isDarkMode ? chrome.runtime.getURL('paused-dark.html') : chrome.runtime.getURL('paused.html')}`,
+            },
             (tab) => {
               pauseTabId = tab.id;
             }
@@ -164,7 +176,9 @@
         }
       } else {
         chrome.tabs.create(
-          { url: chrome.runtime.getURL('paused.html') },
+          {
+            url: `${isDarkMode ? chrome.runtime.getURL('paused-dark.html') : chrome.runtime.getURL('paused.html')}`,
+          },
           (tab) => {
             pauseTabId = tab.id;
           }
@@ -265,20 +279,28 @@
         onclick={reset}>Reset</button
       >
     </div>
-    {#if generalSettingsStore.isAllowPause && timerRef?.getIsRunning()}
-      {#if !timerRef?.getIsPaused()}
-        <button
-          class="w-24 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md"
-          onclick={pause}>Pause</button
-        >
-      {:else}
-        <button
-          class="w-24 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md"
-          onclick={resume}>Resume</button
-        >
+    <div class="flex gap-4">
+      {#if generalSettingsStore.isAllowPause && timerRef?.getIsRunning()}
+        {#if !timerRef?.getIsPaused()}
+          <button
+            class="w-24 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md"
+            onclick={pause}>Pause</button
+          >
+        {:else}
+          <button
+            class="w-24 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md"
+            onclick={resume}>Resume</button
+          >
+        {/if}
       {/if}
-    {/if}
-    <PuzzleList {splits} allowReorder={!timerRef?.getIsRunning()} />
+    </div>
+    <PuzzleList
+      {splits}
+      {currentPuzzle}
+      {timerRef}
+      giveUpCB={dnfCurrentPuzzle}
+      allowReorder={!timerRef?.getIsRunning()}
+    />
     {#if finishTime != null}
       <button class="cursor-pointer" onclick={() => (isShareOverlayOpen = true)}
         >Share your score</button

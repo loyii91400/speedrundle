@@ -52,7 +52,7 @@ function createGeneralSettings() {
 				if (savedIsShowGiveUp) {
 					isShowGiveUp = JSON.parse(savedIsShowGiveUp);
 				} else {
-					isShowGiveUp = false
+					isShowGiveUp = true
 				}
 			} else {
 				chrome.storage.local.get(['isConfetti', 'isAllowPause', 'isShowGiveUp'], (result) => {

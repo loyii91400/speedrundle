@@ -1,11 +1,14 @@
 import puzzlesStore from './store/puzzles.svelte';
 
 export async function fetchPuzzles(
-	urls = 'https://raw.githubusercontent.com/loyii91400/wordleTest/refs/heads/main/links.json'
+	urls = 'https://raw.githubusercontent.com/loyii91400/speedrundle/refs/heads/main/puzzles/puzzles.json'
 ) {
 	try {
 		let error = null;
-		const urlList = urls.split('\n').filter((url) => url.trim());
+		const repoList = await fetch("https://raw.githubusercontent.com/loyii91400/speedrundle/refs/heads/main/puzzles/puzzles.json")
+		const fetchedRepos = await repoList.json();
+		const urlList = fetchedRepos.map(repo => repo.link)
+		// const urlList = urls.split('\n').filter((url) => url.trim());
 
 		// Create a new array to store all fetched puzzles
 		let newPuzzlesArray = [];
