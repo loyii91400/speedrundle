@@ -68,7 +68,6 @@ function createPuzzles() {
         chrome.storage.local.get(['puzzles', 'currentPuzzle'], (result) => {
           if (result.puzzles) {
             puzzles = JSON.parse(result.puzzles);
-            console.log(puzzles);
           }
         });
       }
@@ -77,7 +76,6 @@ function createPuzzles() {
       if (isDebug) {
         localStorage.setItem('puzzles', JSON.stringify(puzzles));
       } else {
-        console.log('saving', puzzles, currentPuzzle);
         chrome.storage.local.set({ puzzles: JSON.stringify(puzzles) });
         chrome.storage.local.set({ currentPuzzle });
       }

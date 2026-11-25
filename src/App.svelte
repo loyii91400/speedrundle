@@ -44,18 +44,6 @@
     generalSettingsStore.load();
 
     try {
-      chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-        if (puzzleTabId === null && pauseTabId === null) return;
-        if (changeInfo.status === 'loading') {
-          if (puzzleTabId === tabId) {
-            chrome.scripting.executeScript({
-              target: { tabId: tabId },
-              files: ['content-script.js'],
-            });
-          }
-        }
-      });
-
       chrome.tabs.onActivated.addListener((activeInfo) => {
         const tabId = activeInfo.tabId;
         if (puzzleTabId === tabId && timerRef?.getIsPaused()) {
@@ -69,7 +57,7 @@
       chrome.tabs.onRemoved.addListener((tabId) => {
         if (puzzleTabId === null && pauseTabId === null) return;
         if (puzzleTabId === tabId) {
-          puzzleTabId === null;
+          puzzleTabId = null;
           dnfCurrentPuzzle();
         }
         if (pauseTabId === tabId) {
@@ -99,11 +87,8 @@
           active: true,
         },
         (tab) => {
+          // content-script.js is auto-injected via manifest.json content_scripts
           puzzleTabId = tab.id;
-          // chrome.scripting.executeScript({
-          //   target: { tabId: tab.id },
-          //   files: ['content-script.js'],
-          // });
         }
       );
       if (timerRef.getIsPaused()) {
