@@ -15,10 +15,10 @@
   "side_panel": {
     "default_path": "index.html"
   },
-  "permissions": ["sidePanel", "storage", "scripting", "activeTab"],
+  "permissions": ["sidePanel", "storage", "scripting"],
+  "optional_host_permissions": ["*://*/*"],
   "background": {
     "service_worker": "background.js",
     "type": "module"
-  },
-  "host_permissions": ["<all_urls>"]
+  }
 }

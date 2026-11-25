@@ -9,19 +9,13 @@
                     ? linkUrl
                     : `https://${linkUrl}`;
 
+            // The content script is registered for all origins, so it is
+            // injected automatically once site access is granted.
             try {
-                chrome.tabs.create(
-                    {
-                        url: formattedUrl,
-                        active: true,
-                    },
-                    (tab) => {
-                        chrome.scripting.executeScript({
-                            target: { tabId: tab.id },
-                            files: ["content-script.js"],
-                        });
-                    },
-                );
+                chrome.tabs.create({
+                    url: formattedUrl,
+                    active: true,
+                });
             } catch (error) {
                 window.open(formattedUrl, "_blank");
             }
