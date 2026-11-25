@@ -58,7 +58,6 @@
         if (puzzleTabId === null && pauseTabId === null) return;
         if (puzzleTabId === tabId) {
           puzzleTabId = null;
-          chrome.storage.local.remove('puzzleTabId');
           dnfCurrentPuzzle();
         }
         if (pauseTabId === tabId) {
@@ -88,10 +87,8 @@
           active: true,
         },
         (tab) => {
+          // content-script.js is auto-injected via manifest.json content_scripts
           puzzleTabId = tab.id;
-          // Written to storage so the content script can confirm this is
-          // the puzzle tab it should monitor.
-          chrome.storage.local.set({ puzzleTabId: tab.id });
         }
       );
       if (timerRef.getIsPaused()) {
@@ -143,7 +140,6 @@
     puzzlesStore.resetCurrentPuzzle();
     splits = [];
     puzzleTabId = null;
-    chrome.storage.local.remove('puzzleTabId');
     finishTime = null;
   }
 
