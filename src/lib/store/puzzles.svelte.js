@@ -5,8 +5,8 @@
 // @field icon string - The url to the icon
 // @field active boolean - Whether the puzzle is active
 // @field index number - The index of the puzzle
-// @field winCheck { mutationType: string, query: string, text: string[] } - The win check configuration
-// @field loseCheck { mutationType: string, query: string, text: string[] } | null - The lose check configuration
+// @field winCheck { query: string, text?: string | string[] } | { type: 'storage', key: string, path: string, equals: any } - The win check configuration
+// @field loseCheck same shape as winCheck, or null to only detect wins
 
 // Configuration flag to determine storage method
 export const isDebug = import.meta.env.DEV; // Set this based on your debug environment
