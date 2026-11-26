@@ -51,6 +51,15 @@
             class="font-medium text-zinc-400 transition-colors hover:text-zinc-200"
             >Report it on GitHub</a
           >.
+          <br />
+          Have a suggestion?
+          <a
+            href={`${REPO_URL}/issues/new?title=Suggestion%3A%20`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-medium text-zinc-400 transition-colors hover:text-zinc-200"
+            >Share it on GitHub</a
+          >.
         </p>
       </div>
       <div class="flex items-center gap-4">
