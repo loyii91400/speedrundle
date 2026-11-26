@@ -10,7 +10,7 @@
 
 const TAG = '[Speedrundle]';
 
-let puzzleState = null; // { key, checks, baselines, winReady, loseReady }
+let puzzleState = null; // { key, checks, winWatch, loseWatch }
 let observer = null;
 let pollInterval = null;
 let heartbeatInterval = null;
@@ -86,8 +86,7 @@ function urlMatchesPuzzle(puzzleUrl) {
 }
 
 // Walk a dotted path through parsed JSON. A "*" segment descends into every
-// array element / object value, e.g. "states.*.data.status". Returns every
-// value found at the end of the path.
+// array element / object value. Returns every value found at the end.
 function readPath(value, segments) {
   if (segments.length === 0) return [value];
   const [head, ...rest] = segments;
@@ -99,12 +98,53 @@ function readPath(value, segments) {
   return readPath(value?.[head], rest);
 }
 
+// Unlike readPath, retain each wildcard branch as a separate entry. This keeps
+// a puzzle's result and daily identity correlated instead of mixing values
+// from different days.
+function readEntryPath(value, segments, path = []) {
+  if (segments.length === 0) {
+    return value === undefined ? [] : [{ path, value }];
+  }
+  if (value === null || typeof value !== 'object') return [];
+  const [head, ...rest] = segments;
+  if (head === '*') {
+    return Object.entries(value).flatMap(([key, child]) =>
+      readEntryPath(child, rest, [...path, key])
+    );
+  }
+  return readEntryPath(value[head], rest, [...path, head]);
+}
+
+function pathSegments(path) {
+  return path ? path.split('.') : [];
+}
+
+// Checks saved by older versions put wildcards in `path`. Interpret everything
+// through the last wildcard as entryPath so those saved puzzles get the same
+// per-day behavior after the extension updates.
+function normalizeStorageCheck(check) {
+  if (check?.type !== 'storage' || check.entryPath) return check;
+  const segments = pathSegments(check.path);
+  const wildcard = segments.lastIndexOf('*');
+  if (wildcard === -1) return check;
+  const entryPath = segments.slice(0, wildcard + 1).join('.');
+  const prefix = `${entryPath}.`;
+  const relativePath = (path) =>
+    path?.startsWith(prefix) ? path.slice(prefix.length) : path;
+  return {
+    ...check,
+    entryPath,
+    path: segments.slice(wildcard + 1).join('.'),
+    counterPath: relativePath(check.counterPath),
+    idPath: relativePath(check.idPath),
+  };
+}
+
 // Storage checks read values the game itself writes to localStorage (shared
 // with content scripts). `key` reads one entry; `keyPrefix` scans every entry
-// whose key starts with the prefix (NYT keys end with the user id, e.g.
-// "games-state-wordleV2/ANON"). `equals` matches a fixed value; `increases`
-// requires a fresh numeric counter. `counterPath` keeps that counter separate
-// from the result path, e.g. Bandle's gameId alongside win/loose.
+// whose key starts with the prefix. `entryPath` identifies independent puzzle
+// states, and `idPath` identifies a new day when one storage object is reused.
+// `equals` matches a fixed value; `increases` requires a fresh numeric counter.
 function storageKeys(check) {
   if (check.key) return [check.key];
   if (check.keyPrefix) {
@@ -115,23 +155,48 @@ function storageKeys(check) {
   return [];
 }
 
-// All values a storage check currently sees, for matching and for logging.
-function collectStorageValues(check) {
+// Every independent storage entry currently visible to a check. An entry's
+// slot identifies its location; its identity changes when idPath changes.
+function collectStorageEntries(check) {
   const out = [];
   for (const key of storageKeys(check)) {
     const raw = localStorage.getItem(key);
     if (raw === null) continue;
     try {
       const parsed = JSON.parse(raw);
+      const entries = check.entryPath
+        ? readEntryPath(parsed, pathSegments(check.entryPath))
+        : [{ path: [], value: parsed }];
+      for (const entry of entries) {
+        const ids = check.idPath
+          ? readPath(entry.value, pathSegments(check.idPath)).filter(
+              (v) => v !== undefined
+            )
+          : [];
+        out.push({
+          key,
+          entryPath: entry.path.join('.'),
+          slot: JSON.stringify([key, entry.path]),
+          identity: check.idPath
+            ? ids.length
+              ? JSON.stringify(ids)
+              : null
+            : JSON.stringify(entry.path),
+          values: readPath(entry.value, pathSegments(check.path)),
+          counterValues: check.counterPath
+            ? readPath(entry.value, pathSegments(check.counterPath))
+            : undefined,
+        });
+      }
+    } catch (e) {
       out.push({
         key,
-        values: readPath(parsed, check.path.split('.')),
-        counterValues: check.counterPath
-          ? readPath(parsed, check.counterPath.split('.'))
-          : undefined,
+        entryPath: '',
+        slot: JSON.stringify([key, []]),
+        identity: null,
+        values: [],
+        error: String(e),
       });
-    } catch (e) {
-      out.push({ key, values: [], error: String(e) });
     }
   }
   return out;
@@ -144,7 +209,7 @@ function formatValue(v) {
 
 // One-line description of everything a storage check sees right now.
 function storageReport(check) {
-  const found = collectStorageValues(check);
+  const found = collectStorageEntries(check);
   if (found.length === 0) return 'no localStorage keys match yet';
   return found
     .map((f) => {
@@ -155,34 +220,45 @@ function storageReport(check) {
       const counters = f.counterValues
         ? `, ${check.counterPath} → ${f.counterValues.length ? f.counterValues.map(formatValue).join(', ') : 'path matched nothing'}`
         : '';
-      return `${f.key} → ${values}${counters}`;
+      const label = f.entryPath ? `${f.key}:${f.entryPath}` : f.key;
+      const identity = check.idPath ? `, id → ${f.identity ?? 'missing'}` : '';
+      return `${label}${identity} → ${values}${counters}`;
     })
     .join(' ; ');
 }
 
 // Counter-based checks compare against the value present when the run armed.
 // A missing counter starts at zero so a first-time player's first win counts.
-function storageBaseline(check) {
-  if (check?.type !== 'storage' || !check.increases) return 0;
-  const values = collectStorageValues(check)
-    .flatMap((f) => (check.counterPath ? (f.counterValues ?? []) : f.values))
-    .filter(Number.isFinite);
+function storageEntryBaseline(check, entry) {
+  if (!check.increases) return 0;
+  const values = (
+    check.counterPath ? (entry.counterValues ?? []) : entry.values
+  ).filter(Number.isFinite);
   return values.length ? Math.max(...values) : 0;
 }
 
-function matchesStorage(check, baseline) {
-  return collectStorageValues(check).some((f) => {
-    const increased = check.counterPath
-      ? f.counterValues?.some((v) => Number.isFinite(v) && v > baseline)
-      : f.values.some((v) => Number.isFinite(v) && v > baseline);
-    if (check.increases && !increased) return false;
-    if (check.increases && !check.counterPath) return true;
-    return f.values.some((v) => v === check.equals);
-  });
+function matchesStorageEntry(check, entry, baseline = 0) {
+  const increased = check.counterPath
+    ? entry.counterValues?.some((v) => Number.isFinite(v) && v > baseline)
+    : entry.values.some((v) => Number.isFinite(v) && v > baseline);
+  if (check.increases && !increased) return false;
+  if (check.increases && !check.counterPath) return true;
+  return entry.values.some((v) => v === check.equals);
 }
 
-function isStorageMatch(check) {
-  return !!check && check.type === 'storage' && matchesStorage(check);
+// Each slot gets its own stale-result suppression. A historical WIN therefore
+// cannot prevent today's separate state from becoming ready and firing.
+function createStorageWatch(check) {
+  const watch = new Map();
+  if (check?.type !== 'storage') return watch;
+  for (const entry of collectStorageEntries(check)) {
+    watch.set(entry.slot, {
+      identity: entry.identity,
+      baseline: storageEntryBaseline(check, entry),
+      ready: check.increases || !matchesStorageEntry(check, entry),
+    });
+  }
+  return watch;
 }
 
 function countDomMatches(check) {
@@ -212,11 +288,10 @@ function checkCondition(check, mutationType, status) {
   }
 }
 
-// A storage result that was already on disk when the page loaded is stale
-// (e.g. yesterday's finished game still in storage) and must clear once
-// before a match can fire — otherwise yesterday's WIN would instantly split
-// today's run. A game finished during this session always passes through a
-// non-matching state first, so real results are unaffected.
+// Results already on disk at arm time are stale and suppressed per entry.
+// Existing entries become eligible after a non-matching state; a new entry or
+// a changed daily identity is eligible immediately. Missing entries retain
+// their watch state so a temporarily removed stale result cannot rearm itself.
 function checkStorageCondition(field, status) {
   const check = puzzleState?.[field];
   if (!check || check.type !== 'storage' || done) return;
@@ -226,22 +301,39 @@ function checkStorageCondition(field, status) {
     lastStorageReport[reportKey] = report;
     log(`${field} now sees: ${report}`);
   }
-  const baselineField = field === 'winCheck' ? 'winBaseline' : 'loseBaseline';
-  const matched = matchesStorage(check, puzzleState[baselineField]);
-  const readyField = field === 'winCheck' ? 'winReady' : 'loseReady';
-  if (!puzzleState[readyField]) {
-    if (!matched) {
-      puzzleState[readyField] = true;
-      log(`${field} cleared — ready to detect new results`);
+  const watch = puzzleState[field === 'winCheck' ? 'winWatch' : 'loseWatch'];
+  for (const entry of collectStorageEntries(check)) {
+    let watched = watch.get(entry.slot);
+    if (!watched) {
+      watched = { identity: entry.identity, baseline: 0, ready: true };
+      watch.set(entry.slot, watched);
+      log(`${field} found new storage entry ${entry.slot}`);
+    } else if (entry.identity !== null && entry.identity !== watched.identity) {
+      const hadIdentity = watched.identity !== null;
+      watched.identity = entry.identity;
+      watched.baseline = 0;
+      // Learning an initially missing ID is not a new day. Only a transition
+      // between two known identities makes a reused object eligible again.
+      if (hadIdentity) watched.ready = true;
+      log(`${field} daily identity changed at ${entry.slot}`);
     }
-    return;
-  }
-  if (matched) {
-    const comparison = check.increases
-      ? `${check.counterPath ?? check.path} increased above ${formatValue(puzzleState[baselineField])}${check.counterPath ? `; ${check.path} === ${formatValue(check.equals)}` : ''}`
-      : `${check.path} === ${formatValue(check.equals)}`;
-    log(`${status} storage condition fired: ${comparison}`);
-    sendResult(status);
+
+    const matched = matchesStorageEntry(check, entry, watched.baseline);
+    if (!watched.ready) {
+      if (!matched) {
+        watched.ready = true;
+        log(`${field} cleared at ${entry.slot} — ready to detect new results`);
+      }
+      continue;
+    }
+    if (matched) {
+      const comparison = check.increases
+        ? `${check.counterPath ?? check.path} increased above ${formatValue(watched.baseline)}${check.counterPath ? `; ${check.path} === ${formatValue(check.equals)}` : ''}`
+        : `${check.path} === ${formatValue(check.equals)}`;
+      log(`${status} storage condition fired at ${entry.slot}: ${comparison}`);
+      sendResult(status);
+      return;
+    }
   }
 }
 
@@ -276,14 +368,15 @@ function scan(mutationType) {
 function logHeartbeat() {
   if (!puzzleState || done) return;
   const parts = [];
-  for (const [label, check, ready] of [
-    ['win', puzzleState.winCheck, puzzleState.winReady],
-    ['lose', puzzleState.loseCheck, puzzleState.loseReady],
+  for (const [label, check, watch] of [
+    ['win', puzzleState.winCheck, puzzleState.winWatch],
+    ['lose', puzzleState.loseCheck, puzzleState.loseWatch],
   ]) {
     if (!check) continue;
     if (check.type === 'storage') {
+      const stale = [...watch.values()].filter((entry) => !entry.ready).length;
       parts.push(
-        `${label}: storage [${storageReport(check)}]${ready ? '' : ' (waiting for stale result to clear)'}`
+        `${label}: storage [${storageReport(check)}]${stale ? ` (${stale} stale ${stale === 1 ? 'entry' : 'entries'} ignored)` : ''}`
       );
     } else {
       const n = countDomMatches(check);
@@ -298,14 +391,14 @@ function logHeartbeat() {
 function arm(puzzle, key) {
   observer?.disconnect();
   clearTimers();
+  const winCheck = normalizeStorageCheck(puzzle.winCheck);
+  const loseCheck = normalizeStorageCheck(puzzle.loseCheck);
   puzzleState = {
     key,
-    winCheck: puzzle.winCheck,
-    loseCheck: puzzle.loseCheck,
-    winBaseline: storageBaseline(puzzle.winCheck),
-    loseBaseline: storageBaseline(puzzle.loseCheck),
-    winReady: !isStorageMatch(puzzle.winCheck),
-    loseReady: !isStorageMatch(puzzle.loseCheck),
+    winCheck,
+    loseCheck,
+    winWatch: createStorageWatch(winCheck),
+    loseWatch: createStorageWatch(loseCheck),
   };
   done = false;
   lastStorageReport = { win: '', lose: '' };
@@ -317,21 +410,19 @@ function arm(puzzle, key) {
     subtree: true,
     characterData: true,
   });
-  const hasStorage = [puzzle.winCheck, puzzle.loseCheck].some(
-    (c) => c?.type === 'storage'
-  );
+  const hasStorage = [winCheck, loseCheck].some((c) => c?.type === 'storage');
   if (hasStorage) pollInterval = setInterval(() => scan(null), 100);
   heartbeatInterval = setInterval(logHeartbeat, 5000);
 
   log(`Armed for "${puzzle.name}" — ${location.href}`);
-  log('winCheck:', JSON.stringify(puzzle.winCheck));
-  log('loseCheck:', JSON.stringify(puzzle.loseCheck));
+  log('winCheck:', JSON.stringify(winCheck));
+  log('loseCheck:', JSON.stringify(loseCheck));
 
   // Surface config problems at arm time rather than letting them fail
   // silently in the background.
   for (const [label, check] of [
-    ['winCheck', puzzle.winCheck],
-    ['loseCheck', puzzle.loseCheck],
+    ['winCheck', winCheck],
+    ['loseCheck', loseCheck],
   ]) {
     if (!check) {
       log(`${label}: none configured`);
@@ -422,7 +513,7 @@ async function update() {
     log(
       `Current puzzle is "${puzzle.name}" (${puzzle.url}) — URL ${urlMatch ? 'MATCHES' : 'does NOT match'} this page`
     );
-    const key = `${result.currentPuzzle}:${puzzle.url}`;
+    const key = `${result.currentPuzzle}:${puzzle.url}:${JSON.stringify([puzzle.winCheck, puzzle.loseCheck])}`;
     if (urlMatch) {
       if (puzzleState?.key !== key) arm(puzzle, key);
     } else if (

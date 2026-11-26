@@ -2,12 +2,14 @@
  * A DOM-based check watches for an element (optionally with matching text);
  * a storage check reads values the game writes to localStorage. For storage
  * checks, "key" reads one entry, "keyPrefix" scans all entries starting with
- * it, and a "*" path segment scans every array element/object value
- * (e.g. "states.*.data.status"). "equals" matches a fixed value;
- * "increases" requires a numeric counter to rise above its value at arm time.
- * "counterPath" selects a separate freshness counter, such as a game ID.
+ * it. "entryPath" selects independent puzzle states (e.g. "states.*"), and
+ * "idPath" identifies a new day when a single storage object is reused.
+ * "path", "idPath", and "counterPath" are relative to entryPath when present.
+ * "equals" matches a fixed value; "increases" requires a numeric counter to
+ * rise above its value at arm time. "counterPath" selects a separate freshness
+ * counter for cumulative result checks.
  *
- * @typedef {{ mutationType?: string, query: string, text?: string | string[] } | { type: 'storage', key?: string, keyPrefix?: string, path: string, equals?: any, counterPath?: string, increases?: boolean }} PuzzleCheck
+ * @typedef {{ mutationType?: string, query: string, text?: string | string[] } | { type: 'storage', key?: string, keyPrefix?: string, entryPath?: string, idPath?: string, path: string, equals?: any, counterPath?: string, increases?: boolean }} PuzzleCheck
  *
  * @typedef {object} Puzzle
  * @property {string} name

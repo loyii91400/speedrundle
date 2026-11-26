@@ -36,6 +36,7 @@ Then load it in Chrome:
 ## Other scripts
 
 ```sh
+npm test         # storage win/lose detection regression tests
 npm run check    # svelte-check (type-checks .svelte and .js sources)
 npm run format   # prettier
 ```

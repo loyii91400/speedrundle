@@ -7,7 +7,9 @@ import catalogue from '$lib/data/games.json';
  * @property {string} [type]
  * @property {string} [key]
  * @property {string} [keyPrefix]
- * @property {string} [path]
+ * @property {string} [entryPath] - Independent puzzle states, e.g. `states.*`
+ * @property {string} [idPath] - Daily identity within an entry, e.g. `gameId`
+ * @property {string} [path] - Result path, relative to entryPath when present
  * @property {*} [equals]
  * @property {string} [counterPath]
  * @property {boolean} [increases]

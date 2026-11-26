@@ -12,13 +12,15 @@
       "winCheck": {
         "type": "storage",
         "keyPrefix": "games-state-wordleV2/",
-        "path": "states.*.data.status",
+        "entryPath": "states.*",
+        "path": "data.status",
         "equals": "WIN"
       },
       "loseCheck": {
         "type": "storage",
         "keyPrefix": "games-state-wordleV2/",
-        "path": "states.*.data.status",
+        "entryPath": "states.*",
+        "path": "data.status",
         "equals": "FAIL"
       }
     },
@@ -33,7 +35,8 @@
       "winCheck": {
         "type": "storage",
         "keyPrefix": "games-state-strands/",
-        "path": "states.*.data.isSolved",
+        "entryPath": "states.*",
+        "path": "data.isSolved",
         "equals": true
       },
       "loseCheck": null
@@ -49,13 +52,15 @@
       "winCheck": {
         "type": "storage",
         "keyPrefix": "games-state-connections/",
-        "path": "states.*.data.puzzleWon",
+        "entryPath": "states.*",
+        "path": "data.puzzleWon",
         "equals": true
       },
       "loseCheck": {
         "type": "storage",
         "keyPrefix": "games-state-connections/",
-        "path": "states.*.data.puzzleComplete",
+        "entryPath": "states.*",
+        "path": "data.puzzleComplete",
         "equals": true
       }
     },
@@ -86,12 +91,14 @@
       "winCheck": {
         "type": "storage",
         "key": "status",
+        "idPath": "gameId",
         "path": "win",
         "equals": true
       },
       "loseCheck": {
         "type": "storage",
         "key": "status",
+        "idPath": "gameId",
         "path": "loose",
         "equals": true
       }

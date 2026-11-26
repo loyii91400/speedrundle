@@ -7,6 +7,7 @@
   import PuzzleList from './lib/component/PuzzleList.svelte';
   import Share from './lib/component/Share.svelte';
   import puzzlesStore from './lib/store/puzzles.svelte.js';
+  import { fetchPuzzles } from './lib/puzzleFetcher.js';
   import nextPuzzleStore from './lib/store/nextPuzzle.svelte';
   import generalSettingsStore from './lib/store/generalSettings.svelte';
   import { getIsDarkMode, loadTheme } from './lib/store/theme.svelte.js';
@@ -31,6 +32,7 @@
   let puzzles = $derived(puzzlesStore.activePuzzles);
   /** @type {string | null} */
   let finishTime = $state(null);
+  let puzzlesReady = Promise.resolve();
 
   /** @type {number | null} */
   let puzzleTabId = $state(null);
@@ -44,7 +46,16 @@
   });
 
   onMount(() => {
-    puzzlesStore.load();
+    puzzlesReady = (async () => {
+      try {
+        await puzzlesStore.load();
+        const { error } = await fetchPuzzles();
+        if (error)
+          console.error('Failed to refresh puzzle definitions:', error);
+      } catch (error) {
+        console.error('Failed to load puzzle definitions:', error);
+      }
+    })();
     generalSettingsStore.load();
     loadTheme();
 
@@ -117,7 +128,9 @@
     }
   }
 
-  function start() {
+  async function start() {
+    if (!timerRef) return;
+    await puzzlesReady;
     if (!timerRef) return;
     reset();
     timerRef.start();

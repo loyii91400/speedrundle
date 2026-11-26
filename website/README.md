@@ -25,6 +25,12 @@ for both this site and the extension. Each entry has:
 - Site fields: `slug`, `category`, `publisher`, `description`
 - Extension contract fields: `name`, `url`, `icon`, `winCheck`, `loseCheck`
 
+For storage checks, `entryPath` selects independent puzzle states (for example
+`states.*`) and `idPath` identifies a new day when one object is reused (for
+example `gameId`). When `entryPath` is present, `path`, `idPath`, and
+`counterPath` are relative to it. Use `increases` only for cumulative counters
+such as Wiki Game Daily's `daysCompleted`, not for a daily game ID.
+
 Categories are listed in the `categories` array at the top of `games.json`. Colors are
 assigned automatically from a palette by position in that array — just append a new category
 to the list and it gets the next color (sky, emerald, violet, rose, teal, fuchsia, lime,
