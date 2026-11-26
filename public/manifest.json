@@ -18,7 +18,11 @@
   "permissions": ["sidePanel", "storage", "scripting", "activeTab"],
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": [
+        "https://www.nytimes.com/*",
+        "https://www.thewikigamedaily.com/*",
+        "https://bandle.app/*"
+      ],
       "js": ["content-script.js"],
       "run_at": "document_idle"
     }

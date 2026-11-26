@@ -1,11 +1,10 @@
 // @class puzzle
 // @field name string - The name of the puzzle
-// @field sourceUrl string - The url of the source of the puzzle
 // @field url string - The url to the puzzle
 // @field icon string - The url to the icon
 // @field active boolean - Whether the puzzle is active
 // @field index number - The index of the puzzle
-// @field winCheck { query: string, text?: string | string[] } | { type: 'storage', key: string, path: string, equals: any } - The win check configuration
+// @field winCheck { mutationType?: string, query: string, text?: string | string[] } | { type: 'storage', key?: string, keyPrefix?: string, path: string, equals: any } - The win check configuration. Storage checks read localStorage; "key" reads one entry, "keyPrefix" scans all entries starting with it, and a "*" path segment scans every array element/object value (e.g. "states.*.data.status").
 // @field loseCheck same shape as winCheck, or null to only detect wins
 
 // Configuration flag to determine storage method

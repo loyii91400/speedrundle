@@ -16,7 +16,6 @@
   import HowToPlay from './lib/component/HowToPlay.svelte';
   import PuzzleList from './lib/component/PuzzleList.svelte';
   import Share from './lib/component/Share.svelte';
-  import sourceUrlsStore from './lib/store/sourceUrls.svelte';
   // import { fetchPuzzles } from './lib/puzzleFetcher';
   // import LinkOpener from './lib/component/LinkOpener.svelte';
   let isSettingsOverlayOpen = $state(false);
@@ -40,7 +39,6 @@
 
   onMount(() => {
     puzzlesStore.load();
-    sourceUrlsStore.load();
     generalSettingsStore.load();
 
     try {

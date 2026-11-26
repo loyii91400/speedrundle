@@ -5,14 +5,14 @@
     "icon": "https://www.nytimes.com/games-assets/v2/metadata/wordle-apple-touch-icon.png?v=v2504091145",
     "winCheck": {
       "type": "storage",
-      "key": "nyt-wordle-state",
-      "path": "gameStatus",
+      "keyPrefix": "games-state-wordleV2/",
+      "path": "states.*.data.status",
       "equals": "WIN"
     },
     "loseCheck": {
       "type": "storage",
-      "key": "nyt-wordle-state",
-      "path": "gameStatus",
+      "keyPrefix": "games-state-wordleV2/",
+      "path": "states.*.data.status",
       "equals": "FAIL"
     }
   },

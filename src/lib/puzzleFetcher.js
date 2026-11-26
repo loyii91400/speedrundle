@@ -1,37 +1,20 @@
 import puzzlesStore from './store/puzzles.svelte';
 
-export async function fetchPuzzles(
-	urls = 'https://raw.githubusercontent.com/loyii91400/speedrundle/refs/heads/main/puzzles/puzzles.json'
-) {
+export async function fetchPuzzles() {
 	try {
 		let error = null;
-		const repoList = await fetch("https://raw.githubusercontent.com/loyii91400/speedrundle/refs/heads/main/puzzles/puzzles.json")
-		const fetchedRepos = await repoList.json();
-		const urlList = fetchedRepos.map(repo => repo.link)
-		// const urlList = urls.split('\n').filter((url) => url.trim());
+
+		// links.json is served from public/ in dev and bundled at the
+		// extension root in production, so a relative fetch works in both.
+		const response = await fetch('links.json');
+		if (!response.ok) throw new Error('Failed to fetch links.json');
+		const fetchedPuzzles = await response.json();
 
 		// Create a new array to store all fetched puzzles
-		let newPuzzlesArray = [];
-
-		// Fetch puzzles from all URLs
-		for (const url of urlList) {
-			try {
-				const response = await fetch(url.trim());
-				if (!response.ok) throw new Error(`Failed to fetch from ${url}`);
-				const fetchedPuzzles = await response.json();
-
-				// Add sourceUrl to each puzzle
-				const puzzlesWithSource = fetchedPuzzles.map((puzzle, i) => ({
-					...puzzle,
-					index: i,
-					sourceUrl: url.trim(),
-				}));
-
-				newPuzzlesArray.push(...puzzlesWithSource);
-			} catch (e) {
-				error = (error ? error + '\n' : '') + `Error fetching ${url}`;
-			}
-		}
+		let newPuzzlesArray = fetchedPuzzles.map((puzzle, i) => ({
+			...puzzle,
+			index: i,
+		}));
 
 		// Update active status based on current puzzles
 		newPuzzlesArray = newPuzzlesArray.map((newPuzzle) => {
