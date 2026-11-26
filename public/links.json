@@ -90,5 +90,24 @@
       "path": "loose",
       "equals": true
     }
+  },
+  {
+    "name": "Tower of Questions",
+    "url": "https://towerofquestions.com/",
+    "icon": "https://towerofquestions.com/favicon.ico",
+    "category": "Trivia",
+    "publisher": "Tower of Questions",
+    "winCheck": {
+      "type": "storage",
+      "keyPrefix": "tower-of-questions:prototype-run:",
+      "path": "state.status",
+      "equals": "won"
+    },
+    "loseCheck": {
+      "type": "storage",
+      "keyPrefix": "tower-of-questions:prototype-run:",
+      "path": "state.status",
+      "equals": "lost"
+    }
   }
 ]

@@ -21,7 +21,8 @@
       "matches": [
         "https://www.nytimes.com/*",
         "https://www.thewikigamedaily.com/*",
-        "https://bandle.app/*"
+        "https://bandle.app/*",
+        "https://towerofquestions.com/*"
       ],
       "js": ["content-script.js"],
       "run_at": "document_idle"
