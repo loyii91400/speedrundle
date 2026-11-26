@@ -1,0 +1,102 @@
+{
+  "categories": ["Words", "Crossword", "Trivia", "Music"],
+  "games": [
+    {
+      "slug": "wordle",
+      "name": "Wordle",
+      "url": "https://www.nytimes.com/games/wordle/index.html",
+      "icon": "https://www.nytimes.com/games-assets/v2/metadata/wordle-apple-touch-icon.png?v=v2504091145",
+      "category": "Words",
+      "publisher": "The New York Times",
+      "description": "Guess the five-letter word in six tries. Color hints tell you which letters are right — a fresh puzzle every day.",
+      "winCheck": {
+        "type": "storage",
+        "keyPrefix": "games-state-wordleV2/",
+        "path": "states.*.data.status",
+        "equals": "WIN"
+      },
+      "loseCheck": {
+        "type": "storage",
+        "keyPrefix": "games-state-wordleV2/",
+        "path": "states.*.data.status",
+        "equals": "FAIL"
+      }
+    },
+    {
+      "slug": "mini",
+      "name": "The Mini",
+      "url": "https://www.nytimes.com/crosswords/game/mini",
+      "icon": "https://www.nytimes.com/games-assets/v2/metadata/nyt-apple-touch-icon.png?v=v2504091256",
+      "category": "Crossword",
+      "publisher": "The New York Times",
+      "description": "A bite-sized 5×5 crossword from the NYT. Small grid, quick clues — built to be speedrun.",
+      "winCheck": {
+        "query": "h1",
+        "text": "Congratulations!"
+      },
+      "loseCheck": null
+    },
+    {
+      "slug": "strands",
+      "name": "Strands",
+      "url": "https://www.nytimes.com/games/strands",
+      "icon": "https://www.nytimes.com/games-assets/v2/metadata/strands-apple-touch-icon.png?v=v2504101308",
+      "category": "Words",
+      "publisher": "The New York Times",
+      "description": "Find the theme words hiding in a grid of letters. Every letter is used exactly once — including the spangram.",
+      "winCheck": {
+        "query": "h3",
+        "text": "NEXT PUZZLE IN"
+      },
+      "loseCheck": null
+    },
+    {
+      "slug": "connections",
+      "name": "Connections",
+      "url": "https://www.nytimes.com/games/connections",
+      "icon": "https://www.nytimes.com/games-assets/v2/metadata/connections-apple-touch-icon.png?v=v2504101308",
+      "category": "Words",
+      "publisher": "The New York Times",
+      "description": "Group sixteen words into four hidden categories. You only get four mistakes, so pick your groups carefully.",
+      "winCheck": {
+        "query": "h2",
+        "text": ["Perfect!", "Great!", "Solid!", "Phew!"]
+      },
+      "loseCheck": {
+        "query": "h2",
+        "text": "Next Time!"
+      }
+    },
+    {
+      "slug": "wiki-game-daily",
+      "name": "Wiki Game Daily",
+      "url": "https://www.thewikigamedaily.com",
+      "icon": "https://www.thewikigamedaily.com/favicon.png",
+      "category": "Trivia",
+      "publisher": "The Wiki Game",
+      "description": "Race across Wikipedia from a start article to a target article in as few clicks as possible. One route, every day.",
+      "winCheck": {
+        "query": "h1",
+        "text": "Congratulations"
+      },
+      "loseCheck": null
+    },
+    {
+      "slug": "bandle",
+      "name": "Bandle",
+      "url": "https://bandle.app/daily",
+      "icon": "https://bandle.app/favicon.ico",
+      "category": "Music",
+      "publisher": "Bandle",
+      "description": "Guess the daily song title. Each wrong guess lets more of the track's instruments fade in.",
+      "winCheck": {
+        "query": "div",
+        "text": "You got it!"
+      },
+      "loseCheck": {
+        "query": "div",
+        "text": "Good effort!"
+      }
+    }
+  ]
+}

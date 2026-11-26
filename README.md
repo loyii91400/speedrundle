@@ -2,6 +2,8 @@
 
 Speedrun your daily puzzle games. Speedrundle is a Chrome extension (Manifest V3) that strings your daily puzzles — Wordle, the NYT Mini, Strands, Connections, and more — into a single timed run, with automatic splits when each game detects your win (or loss).
 
+Install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/dbfenbaoamakbdffgddofjmfeblfjohl), or build it from source (below).
+
 ## How it works
 
 - The extension's **side panel** (a Svelte app) drives the run: it opens each puzzle in a tab, tracks the timer, and records splits.
@@ -52,3 +54,19 @@ src/
   lib/event.svelte.js  GAME_FINISHED message handler
 extension/          Build output (gitignored) — load this into Chrome
 ```
+
+## Website
+
+`website/` is a static SvelteKit site listing every game playable in the extension, with
+search, category filters, and install instructions:
+
+```sh
+cd website
+npm install
+npm run dev        # local dev server
+npm run sync:links # regenerate public/links.json + manifest matches from the site catalogue
+```
+
+The game catalogue lives in `website/src/lib/data/games.json` — the single source of truth
+for both the site and the extension. After adding a game there, run `npm run sync:links` in
+`website/` so the extension can load and detect it.
