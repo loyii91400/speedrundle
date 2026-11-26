@@ -22,7 +22,8 @@
         "https://www.nytimes.com/*",
         "https://www.thewikigamedaily.com/*",
         "https://bandle.app/*",
-        "https://towerofquestions.com/*"
+        "https://towerofquestions.com/*",
+        "https://krillion.io/*"
       ],
       "js": ["content-script.js"],
       "run_at": "document_idle"

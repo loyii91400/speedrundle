@@ -123,6 +123,20 @@
         "path": "state.status",
         "equals": "lost"
       }
+    },
+    {
+      "slug": "krillion",
+      "name": "Krillion",
+      "url": "https://krillion.io/",
+      "icon": "https://krillion.io/icon.png",
+      "category": "Trivia",
+      "publisher": "Krillion",
+      "description": "Seven prompts a day, same for everyone. Rare answers sink you deeper. Obvious ones barely count.",
+      "winCheck": {
+        "query": "span.text-drift",
+        "text": " complete"
+      },
+      "loseCheck": null
     }
   ]
 }

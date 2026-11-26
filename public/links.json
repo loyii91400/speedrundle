@@ -109,5 +109,17 @@
       "path": "state.status",
       "equals": "lost"
     }
+  },
+  {
+    "name": "Krillion",
+    "url": "https://krillion.io/",
+    "icon": "https://krillion.io/icon.png",
+    "category": "Trivia",
+    "publisher": "Krillion",
+    "winCheck": {
+      "query": "span.text-drift",
+      "text": " complete"
+    },
+    "loseCheck": null
   }
 ]
