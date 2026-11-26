@@ -110,7 +110,7 @@
       "icon": "https://towerofquestions.com/favicon.ico",
       "category": "Trivia",
       "publisher": "Tower of Questions",
-      "description": "Climb a moonlit tower in this high-stakes daily trivia game.",
+      "description": "Climb a moonlit tower in this daily trivia game.",
       "winCheck": {
         "type": "storage",
         "keyPrefix": "tower-of-questions:prototype-run:",

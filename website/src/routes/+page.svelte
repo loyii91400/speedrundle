@@ -66,12 +66,8 @@
     Daily puzzle speedruns
   </p>
   <h1 class="font-display mx-auto max-w-2xl text-4xl font-bold tracking-tight sm:text-5xl">
-    Every daily game. One timed run.
+    Your daily puzzles. One timed run.
   </h1>
-  <p class="mx-auto mt-4 max-w-xl text-zinc-400">
-    The Speedrundle extension strings your daily puzzles — Wordle, the Mini, Strands, and more —
-    into a single timed run with automatic splits. Every game below is playable in the extension.
-  </p>
   <div class="mt-6 flex items-center justify-center gap-3">
     <a
       href={STORE_URL}
