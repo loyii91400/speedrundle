@@ -40,7 +40,19 @@
     <div
       class="mx-auto flex w-full max-w-5xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-zinc-500 sm:flex-row sm:px-6"
     >
-      <p>Speedrundle — speedrun your daily puzzles.</p>
+      <div class="text-center sm:text-left">
+        <p>Speedrundle — speedrun your daily puzzles.</p>
+        <p class="mt-1 text-xs">
+          Found a bug or have an issue?
+          <a
+            href={`${REPO_URL}/issues/new`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-medium text-zinc-400 transition-colors hover:text-zinc-200"
+            >Report it on GitHub</a
+          >.
+        </p>
+      </div>
       <div class="flex items-center gap-4">
         <a href="/install" class="transition-colors hover:text-zinc-300">Install the extension</a>
         <a

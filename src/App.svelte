@@ -339,6 +339,16 @@
         >Share your score</button
       >
     {/if}
+    <p class="mt-4 text-center text-sm text-zinc-500 dark:text-zinc-400">
+      Found a bug or have an issue?
+      <a
+        href="https://github.com/loyii91400/speedrundle/issues/new"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="font-medium text-amber-600 transition-colors hover:text-amber-500 dark:text-amber-400 dark:hover:text-amber-300"
+        >Report it on GitHub</a
+      >.
+    </p>
   </div>
 </div>
 
