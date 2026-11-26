@@ -5,9 +5,12 @@ import catalogue from '$lib/data/games.json';
  * Either a DOM check (`query` + `text`) or a storage check (`type: 'storage'`).
  * @typedef {Object} WinCheck
  * @property {string} [type]
+ * @property {string} [key]
  * @property {string} [keyPrefix]
  * @property {string} [path]
- * @property {string} [equals]
+ * @property {*} [equals]
+ * @property {string} [counterPath]
+ * @property {boolean} [increases]
  * @property {string} [query]
  * @property {string | string[]} [text]
  */

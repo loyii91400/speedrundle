@@ -10,7 +10,7 @@
 
 const TAG = '[Speedrundle]';
 
-let puzzleState = null; // { key, winCheck, loseCheck, winReady, loseReady }
+let puzzleState = null; // { key, checks, baselines, winReady, loseReady }
 let observer = null;
 let pollInterval = null;
 let heartbeatInterval = null;
@@ -18,6 +18,7 @@ let scanTimer = null;
 const pendingScanTypes = new Set();
 let lastStorageReport = { win: '', lose: '' };
 let done = false;
+let lastPageUrl = location.href;
 
 function log(...args) {
   console.log(TAG, ...args);
@@ -101,7 +102,9 @@ function readPath(value, segments) {
 // Storage checks read values the game itself writes to localStorage (shared
 // with content scripts). `key` reads one entry; `keyPrefix` scans every entry
 // whose key starts with the prefix (NYT keys end with the user id, e.g.
-// "games-state-wordleV2/ANON").
+// "games-state-wordleV2/ANON"). `equals` matches a fixed value; `increases`
+// requires a fresh numeric counter. `counterPath` keeps that counter separate
+// from the result path, e.g. Bandle's gameId alongside win/loose.
 function storageKeys(check) {
   if (check.key) return [check.key];
   if (check.keyPrefix) {
@@ -119,9 +122,13 @@ function collectStorageValues(check) {
     const raw = localStorage.getItem(key);
     if (raw === null) continue;
     try {
+      const parsed = JSON.parse(raw);
       out.push({
         key,
-        values: readPath(JSON.parse(raw), check.path.split('.')),
+        values: readPath(parsed, check.path.split('.')),
+        counterValues: check.counterPath
+          ? readPath(parsed, check.counterPath.split('.'))
+          : undefined,
       });
     } catch (e) {
       out.push({ key, values: [], error: String(e) });
@@ -140,18 +147,38 @@ function storageReport(check) {
   const found = collectStorageValues(check);
   if (found.length === 0) return 'no localStorage keys match yet';
   return found
-    .map((f) =>
-      f.error
-        ? `${f.key} → parse error: ${f.error}`
-        : `${f.key} → ${f.values.length ? f.values.map(formatValue).join(', ') : 'path matched nothing'}`
-    )
+    .map((f) => {
+      if (f.error) return `${f.key} → parse error: ${f.error}`;
+      const values = f.values.length
+        ? f.values.map(formatValue).join(', ')
+        : 'path matched nothing';
+      const counters = f.counterValues
+        ? `, ${check.counterPath} → ${f.counterValues.length ? f.counterValues.map(formatValue).join(', ') : 'path matched nothing'}`
+        : '';
+      return `${f.key} → ${values}${counters}`;
+    })
     .join(' ; ');
 }
 
-function matchesStorage(check) {
-  return collectStorageValues(check).some((f) =>
-    f.values.some((v) => v === check.equals)
-  );
+// Counter-based checks compare against the value present when the run armed.
+// A missing counter starts at zero so a first-time player's first win counts.
+function storageBaseline(check) {
+  if (check?.type !== 'storage' || !check.increases) return 0;
+  const values = collectStorageValues(check)
+    .flatMap((f) => (check.counterPath ? (f.counterValues ?? []) : f.values))
+    .filter(Number.isFinite);
+  return values.length ? Math.max(...values) : 0;
+}
+
+function matchesStorage(check, baseline) {
+  return collectStorageValues(check).some((f) => {
+    const increased = check.counterPath
+      ? f.counterValues?.some((v) => Number.isFinite(v) && v > baseline)
+      : f.values.some((v) => Number.isFinite(v) && v > baseline);
+    if (check.increases && !increased) return false;
+    if (check.increases && !check.counterPath) return true;
+    return f.values.some((v) => v === check.equals);
+  });
 }
 
 function isStorageMatch(check) {
@@ -199,7 +226,8 @@ function checkStorageCondition(field, status) {
     lastStorageReport[reportKey] = report;
     log(`${field} now sees: ${report}`);
   }
-  const matched = matchesStorage(check);
+  const baselineField = field === 'winCheck' ? 'winBaseline' : 'loseBaseline';
+  const matched = matchesStorage(check, puzzleState[baselineField]);
   const readyField = field === 'winCheck' ? 'winReady' : 'loseReady';
   if (!puzzleState[readyField]) {
     if (!matched) {
@@ -209,9 +237,10 @@ function checkStorageCondition(field, status) {
     return;
   }
   if (matched) {
-    log(
-      `${status} storage condition fired: ${check.path} === ${formatValue(check.equals)}`
-    );
+    const comparison = check.increases
+      ? `${check.counterPath ?? check.path} increased above ${formatValue(puzzleState[baselineField])}${check.counterPath ? `; ${check.path} === ${formatValue(check.equals)}` : ''}`
+      : `${check.path} === ${formatValue(check.equals)}`;
+    log(`${status} storage condition fired: ${comparison}`);
     sendResult(status);
   }
 }
@@ -273,6 +302,8 @@ function arm(puzzle, key) {
     key,
     winCheck: puzzle.winCheck,
     loseCheck: puzzle.loseCheck,
+    winBaseline: storageBaseline(puzzle.winCheck),
+    loseBaseline: storageBaseline(puzzle.loseCheck),
     winReady: !isStorageMatch(puzzle.winCheck),
     loseReady: !isStorageMatch(puzzle.loseCheck),
   };
@@ -347,6 +378,19 @@ function disarm() {
   puzzleState = null;
 }
 
+// Chrome may have serialized the Svelte array proxy as an object with
+// numeric keys. Accept that older format as well as arrays and JSON strings.
+function normalizeSavedPuzzles(value) {
+  const saved = typeof value === 'string' ? JSON.parse(value) : value;
+  if (Array.isArray(saved)) return saved;
+  if (!saved || typeof saved !== 'object') return null;
+  const entries = Object.entries(saved);
+  if (!entries.every(([key]) => /^\d+$/.test(key))) return null;
+  return entries
+    .sort(([a], [b]) => Number(a) - Number(b))
+    .map(([, puzzle]) => puzzle);
+}
+
 async function update() {
   try {
     const result = await chrome.storage.local.get(['puzzles', 'currentPuzzle']);
@@ -357,12 +401,12 @@ async function update() {
       disarm();
       return;
     }
-    // Puzzles are stored as a plain object now; older versions stored a
-    // JSON string, so accept both.
-    const savedPuzzles =
-      typeof result.puzzles === 'string'
-        ? JSON.parse(result.puzzles)
-        : result.puzzles;
+    const savedPuzzles = normalizeSavedPuzzles(result.puzzles);
+    if (!savedPuzzles) {
+      warn('Saved puzzles have an unsupported format:', result.puzzles);
+      disarm();
+      return;
+    }
     const active = savedPuzzles
       .filter((p) => p.active)
       .sort((a, b) => a.index - b.index);
@@ -378,9 +422,17 @@ async function update() {
     log(
       `Current puzzle is "${puzzle.name}" (${puzzle.url}) — URL ${urlMatch ? 'MATCHES' : 'does NOT match'} this page`
     );
+    const key = `${result.currentPuzzle}:${puzzle.url}`;
     if (urlMatch) {
-      const key = `${result.currentPuzzle}:${puzzle.url}`;
       if (puzzleState?.key !== key) arm(puzzle, key);
+    } else if (
+      puzzleState?.key === key &&
+      location.origin === new URL(puzzle.url).origin
+    ) {
+      // Bandle's answer search is a separate /search route in the same SPA.
+      // Keep the original baselines and readiness so a result written there
+      // still counts, and returning to /daily does not look like a stale win.
+      log('Same-origin puzzle route — keeping the detector armed');
     } else {
       disarm();
     }
@@ -392,6 +444,16 @@ async function update() {
 
 log(`Content script loaded on ${location.href}`);
 update();
+
+// SPA routers use pushState/replaceState, which emit no navigation event.
+// Keep this poll active even while disarmed so pages such as Bandle's /menu
+// arm the detector after navigating client-side to /daily.
+setInterval(() => {
+  if (location.href === lastPageUrl) return;
+  lastPageUrl = location.href;
+  log(`Page URL changed to ${lastPageUrl} — re-evaluating`);
+  update();
+}, 250);
 
 // Re-evaluate when a run starts or advances while this tab stays open.
 chrome.storage.onChanged.addListener((changes, area) => {

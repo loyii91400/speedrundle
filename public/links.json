@@ -25,8 +25,10 @@
     "category": "Words",
     "publisher": "The New York Times",
     "winCheck": {
-      "query": "h3",
-      "text": "NEXT PUZZLE IN"
+      "type": "storage",
+      "keyPrefix": "games-state-strands/",
+      "path": "states.*.data.isSolved",
+      "equals": true
     },
     "loseCheck": null
   },
@@ -37,12 +39,16 @@
     "category": "Words",
     "publisher": "The New York Times",
     "winCheck": {
-      "query": "h2",
-      "text": ["Perfect!", "Great!", "Solid!", "Phew!"]
+      "type": "storage",
+      "keyPrefix": "games-state-connections/",
+      "path": "states.*.data.puzzleWon",
+      "equals": true
     },
     "loseCheck": {
-      "query": "h2",
-      "text": "Next Time!"
+      "type": "storage",
+      "keyPrefix": "games-state-connections/",
+      "path": "states.*.data.puzzleComplete",
+      "equals": true
     }
   },
   {
@@ -52,8 +58,10 @@
     "category": "Trivia",
     "publisher": "The Wiki Game",
     "winCheck": {
-      "query": "h1",
-      "text": "Congratulations"
+      "type": "storage",
+      "key": "wikipediaGameStats",
+      "path": "daysCompleted",
+      "increases": true
     },
     "loseCheck": null
   },
@@ -64,12 +72,16 @@
     "category": "Music",
     "publisher": "Bandle",
     "winCheck": {
-      "query": "div",
-      "text": "You got it!"
+      "type": "storage",
+      "key": "status",
+      "path": "win",
+      "equals": true
     },
     "loseCheck": {
-      "query": "div",
-      "text": "Good effort!"
+      "type": "storage",
+      "key": "status",
+      "path": "loose",
+      "equals": true
     }
   }
 ]
