@@ -2,6 +2,9 @@
   import puzzleStore from '../store/puzzles.svelte.js';
   import generalSettingsStore from '../store/generalSettings.svelte';
 
+  /**
+   * @type {{ currentPuzzle: number, timerRef: { getIsRunning: () => boolean, getIsPaused: () => boolean, getFormattedTime: () => string } | null, allowReorder?: boolean, splits?: string[], giveUpCB: () => void }}
+   */
   let {
     currentPuzzle,
     timerRef,
@@ -10,18 +13,28 @@
     giveUpCB,
   } = $props();
 
+  /** @type {number | null} */
   let draggedPuzzle = null;
 
+  /**
+   * @param {number} index
+   */
   function handleDragStart(index) {
     if (!allowReorder) return;
     draggedPuzzle = index;
   }
 
+  /**
+   * @param {DragEvent} event
+   */
   function handleDragOver(event) {
     if (!allowReorder) return;
     event.preventDefault();
   }
 
+  /**
+   * @param {number} targetIndex
+   */
   function handleDrop(targetIndex) {
     if (
       !allowReorder ||
@@ -36,6 +49,7 @@
     // Find the actual puzzle objects
     const draggedPuzzleObj = puzzleStore.activePuzzles[draggedPuzzle];
     const targetPuzzleObj = puzzleStore.activePuzzles[targetIndex];
+    if (!draggedPuzzleObj || !targetPuzzleObj) return;
 
     // Swap the indices
     const tempIndex = draggedPuzzleObj.index;
@@ -48,11 +62,16 @@
     draggedPuzzle = null;
   }
 
+  /**
+   * @param {string} url
+   */
   function openPuzzle(url) {
     try {
-      chrome.tabs.create({
-        url,
-        active: true,
+      chrome.tabs.create({ url, active: true }, () => {
+        if (chrome.runtime.lastError) {
+          console.error('Failed to open puzzle tab:', chrome.runtime.lastError);
+          window.open(url, '_blank');
+        }
       });
     } catch (error) {
       window.open(url, '_blank');
@@ -104,7 +123,7 @@
       <button class="cursor-pointer" onclick={() => openPuzzle(puzzle.url)}
         >{puzzle.name}</button
       >
-      {#if currentPuzzle == index && timerRef?.getIsRunning() && !timerRef?.getIsPaused()}
+      {#if currentPuzzle === index && timerRef?.getIsRunning() && !timerRef?.getIsPaused()}
         {#if generalSettingsStore.isShowGiveUp}
           <button
             class="ml-auto p-2 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md cursor-pointer"

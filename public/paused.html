@@ -1,78 +1,77 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Paused Page</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: Arial, sans-serif;
-      transition: background-color 0.5s ease;
-      background-color: #fff;
-    }
-    
-    .content {
-      text-align: center;
-    }
-    
-    .paused-text {
-      font-size: 8rem;
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-      transition: color 0.5s ease;
-      color: #333;
-    }
-    
-    .info-text {
-      font-size: 1.5rem;
-      transition: color 0.5s ease;
-      color: #555;
-    }
-    
-    body.dark {
-      background-color: oklch(21% .034 264.665);
-    }
-    
-    body.dark .paused-text {
-      color: #eee;
-    }
-    
-    body.dark .info-text {
-      color: #bbb;
-    }
-    
-    @media (max-width: 768px) {
-      .paused-text {
-        font-size: 5rem;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Paused Page</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: Arial, sans-serif;
+        transition: background-color 0.5s ease;
+        background-color: #fff;
       }
-      
-      .info-text {
-        font-size: 1.2rem;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .paused-text {
-        font-size: 3rem;
-      }
-      
-      .info-text {
-        font-size: 1rem;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="content">
-    <div class="paused-text">Paused</div>
-    <div class="info-text">Click Resume or the Puzzle's tab to resume</div>
-  </div>
 
-</body>
+      .content {
+        text-align: center;
+      }
+
+      .paused-text {
+        font-size: 8rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        transition: color 0.5s ease;
+        color: #333;
+      }
+
+      .info-text {
+        font-size: 1.5rem;
+        transition: color 0.5s ease;
+        color: #555;
+      }
+
+      body.dark {
+        background-color: oklch(21% 0.034 264.665);
+      }
+
+      body.dark .paused-text {
+        color: #eee;
+      }
+
+      body.dark .info-text {
+        color: #bbb;
+      }
+
+      @media (max-width: 768px) {
+        .paused-text {
+          font-size: 5rem;
+        }
+
+        .info-text {
+          font-size: 1.2rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .paused-text {
+          font-size: 3rem;
+        }
+
+        .info-text {
+          font-size: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="content">
+      <div class="paused-text">Paused</div>
+      <div class="info-text">Click Resume or the Puzzle's tab to resume</div>
+    </div>
+  </body>
 </html>

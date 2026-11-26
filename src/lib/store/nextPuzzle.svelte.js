@@ -6,12 +6,18 @@ function createNextPuzzle() {
     get nextPuzzle() {
       return nextPuzzle;
     },
+    /**
+     * @param {boolean} value
+     */
     set nextPuzzle(value) {
       nextPuzzle = value;
     },
     get dnf() {
       return dnf;
     },
+    /**
+     * @param {boolean} value
+     */
     set dnf(value) {
       dnf = value;
     },

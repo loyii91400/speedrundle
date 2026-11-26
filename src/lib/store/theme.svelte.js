@@ -1,11 +1,34 @@
-let isDarkMode = $state(true)
+import { storageGet, storageSet } from './storage.js';
 
-function getIsDarkMode() {
-	return isDarkMode
+let isDarkMode = $state(true);
+
+export function getIsDarkMode() {
+  return isDarkMode;
 }
 
-function setIsDarkMode(value) {
-	isDarkMode = value
+/**
+ * @param {boolean} value
+ */
+export function setIsDarkMode(value) {
+  isDarkMode = value;
 }
 
-export { getIsDarkMode, setIsDarkMode }
+export async function loadTheme() {
+  const result = await storageGet(['theme']);
+  if (result.theme !== undefined) {
+    isDarkMode = result.theme === 'dark';
+  } else if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
+    isDarkMode = true;
+  }
+  applyTheme();
+}
+
+export function toggleTheme() {
+  isDarkMode = !isDarkMode;
+  storageSet({ theme: isDarkMode ? 'dark' : 'light' });
+  applyTheme();
+}
+
+function applyTheme() {
+  document.documentElement.classList.toggle('dark', isDarkMode);
+}

@@ -2,88 +2,66 @@
 // @alias generalSettings.isAllowPause bool
 // @alias generalSettings.isShowGiveUp bool
 
-// Configuration flag to determine storage method
-export const isDebug = import.meta.env.DEV; // Set this based on your debug environment
+import { storageGet, storageSet } from './storage.js';
 
 function createGeneralSettings() {
-	let isConfetti = $state(true);
-	let isAllowPause = $state(true);
-	let isShowGiveUp = $state(true);
-	// let isHardMode = $state(false);
+  let isConfetti = $state(true);
+  let isAllowPause = $state(true);
+  let isShowGiveUp = $state(true);
 
-	return {
-		get isConfetti() {
-			return isConfetti;
-		},
-		set isConfetti(value) {
-			isConfetti = value;
-			this.save();
-		},
-		get isAllowPause() {
-			return isAllowPause
-		},
-		set isAllowPause(value) {
-			isAllowPause = value;
-			this.save();
-		},
-		get isShowGiveUp() {
-			return isShowGiveUp
-		},
-		set isShowGiveUp(value) {
-			isShowGiveUp = value;
-			this.save();
-		},
-		load: () => {
-			if (isDebug) {
-				const savedIsConfetti = localStorage.getItem('isConfetti');
-				const savedIsAllowPause = localStorage.getItem('isAllowPause');
-				const savedIsShowGiveUp = localStorage.getItem('isShowGiveUp');
-
-				if (savedIsConfetti) {
-					isConfetti = JSON.parse(savedIsConfetti);
-				} else {
-					isConfetti = true
-				}
-				if (savedIsAllowPause) {
-					isAllowPause = JSON.parse(savedIsAllowPause);
-				} else {
-					isAllowPause = true
-				}
-				if (savedIsShowGiveUp) {
-					isShowGiveUp = JSON.parse(savedIsShowGiveUp);
-				} else {
-					isShowGiveUp = true
-				}
-			} else {
-				chrome.storage.local.get(['isConfetti', 'isAllowPause', 'isShowGiveUp'], (result) => {
-					if (result.isConfetti) {
-						isConfetti = result.isConfetti;
-					} else {
-						isConfetti = true
-					}
-					if (result.isAllowPause) {
-						isAllowPause = result.isAllowPause;
-					} else {
-						isAllowPause = true
-					}
-					if (result.isShowGiveUp) {
-						isShowGiveUp = result.isShowGiveUp;
-					} else {
-						isShowGiveUp = true
-					}
-				});
-			}
-		},
-		save: () => {
-			if (isDebug) {
-				localStorage.setItem('isConfetti', JSON.stringify(isConfetti));
-				localStorage.setItem('isAllowPause', JSON.stringify(isAllowPause));
-				localStorage.setItem('isShowGiveUp', JSON.stringify(isShowGiveUp));
-			} else {
-				chrome.storage.local.set({ isConfetti: isConfetti, isAllowPause: isAllowPause, isShowGiveUp: isShowGiveUp });
-			}
-		},
-	};
+  return {
+    get isConfetti() {
+      return isConfetti;
+    },
+    /**
+     * @param {boolean} value
+     */
+    set isConfetti(value) {
+      isConfetti = value;
+      this.save();
+    },
+    get isAllowPause() {
+      return isAllowPause;
+    },
+    /**
+     * @param {boolean} value
+     */
+    set isAllowPause(value) {
+      isAllowPause = value;
+      this.save();
+    },
+    get isShowGiveUp() {
+      return isShowGiveUp;
+    },
+    /**
+     * @param {boolean} value
+     */
+    set isShowGiveUp(value) {
+      isShowGiveUp = value;
+      this.save();
+    },
+    async load() {
+      const result = await storageGet([
+        'isConfetti',
+        'isAllowPause',
+        'isShowGiveUp',
+      ]);
+      // Use !== undefined: a stored `false` is a real value. The previous
+      // truthiness check reset every "off" setting back to true on reload.
+      if (result.isConfetti !== undefined) {
+        isConfetti = result.isConfetti;
+      }
+      if (result.isAllowPause !== undefined) {
+        isAllowPause = result.isAllowPause;
+      }
+      if (result.isShowGiveUp !== undefined) {
+        isShowGiveUp = result.isShowGiveUp;
+      }
+    },
+    save() {
+      storageSet({ isConfetti, isAllowPause, isShowGiveUp });
+    },
+  };
 }
 
 const generalSettingsStore = createGeneralSettings();

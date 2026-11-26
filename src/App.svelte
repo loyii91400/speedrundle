@@ -1,34 +1,40 @@
 <script>
   import ThemePicker from './lib/component/ThemePicker.svelte';
   import Timer from './lib/component/Timer.svelte';
-  import puzzlesStore from './lib/store/puzzles.svelte.js';
-  import nextPuzzleStore from './lib/store/nextPuzzle.svelte';
-  import generalSettingsStore from './lib/store/generalSettings.svelte';
-  import { onMount } from 'svelte';
-  import confetti from 'canvas-confetti';
-  import './lib/event.svelte.js';
-  import { getIsDarkMode } from './lib/store/theme.svelte.js';
-
-  let isDarkMode = $derived(getIsDarkMode());
-
   import Overlay from './lib/component/Overlay.svelte';
   import PuzzleSettings from './lib/component/PuzzleSettings.svelte';
   import HowToPlay from './lib/component/HowToPlay.svelte';
   import PuzzleList from './lib/component/PuzzleList.svelte';
   import Share from './lib/component/Share.svelte';
-  // import { fetchPuzzles } from './lib/puzzleFetcher';
-  // import LinkOpener from './lib/component/LinkOpener.svelte';
+  import puzzlesStore from './lib/store/puzzles.svelte.js';
+  import nextPuzzleStore from './lib/store/nextPuzzle.svelte';
+  import generalSettingsStore from './lib/store/generalSettings.svelte';
+  import { getIsDarkMode, loadTheme } from './lib/store/theme.svelte.js';
+  import { onMount } from 'svelte';
+  import confetti from 'canvas-confetti';
+  import './lib/event.svelte.js';
+
+  let isDarkMode = $derived(getIsDarkMode());
+
   let isSettingsOverlayOpen = $state(false);
   let isHowToPlayOverlayOpen = $state(false);
   let isShareOverlayOpen = $state(false);
 
+  /**
+   * The exported API of Timer.svelte, available via bind:this.
+   * @type {{ start: () => void, stop: () => void, reset: () => void, pause: () => void, resume: () => void, getTime: () => number, getFormattedTime: () => string, getIsRunning: () => boolean, getIsPaused: () => boolean } | null}
+   */
   let timerRef = $state(null);
   let currentPuzzle = $derived(puzzlesStore.currentPuzzle);
+  /** @type {string[]} */
   let splits = $state([]);
   let puzzles = $derived(puzzlesStore.activePuzzles);
+  /** @type {string | null} */
   let finishTime = $state(null);
 
+  /** @type {number | null} */
   let puzzleTabId = $state(null);
+  /** @type {number | null} */
   let pauseTabId = $state(null);
 
   $effect(() => {
@@ -40,9 +46,12 @@
   onMount(() => {
     puzzlesStore.load();
     generalSettingsStore.load();
+    loadTheme();
 
+    let removeListeners = () => {};
     try {
-      chrome.tabs.onActivated.addListener((activeInfo) => {
+      /** @param {chrome.tabs.OnActivatedInfo} activeInfo */
+      const onActivated = (activeInfo) => {
         const tabId = activeInfo.tabId;
         if (puzzleTabId === tabId && timerRef?.getIsPaused()) {
           resume();
@@ -50,9 +59,9 @@
         if (pauseTabId === tabId && !timerRef?.getIsPaused()) {
           pause();
         }
-      });
-
-      chrome.tabs.onRemoved.addListener((tabId) => {
+      };
+      /** @param {number} tabId */
+      const onRemoved = (tabId) => {
         if (puzzleTabId === null && pauseTabId === null) return;
         if (puzzleTabId === tabId) {
           puzzleTabId = null;
@@ -62,10 +71,17 @@
           pauseTabId = null;
           resume();
         }
-      });
+      };
+      chrome.tabs.onActivated.addListener(onActivated);
+      chrome.tabs.onRemoved.addListener(onRemoved);
+      removeListeners = () => {
+        chrome.tabs.onActivated.removeListener(onActivated);
+        chrome.tabs.onRemoved.removeListener(onRemoved);
+      };
     } catch (error) {
       console.error(error);
     }
+    return removeListeners;
   });
 
   function dnfCurrentPuzzle() {
@@ -78,34 +94,38 @@
       stop();
       return;
     }
+    const url = puzzlesStore.activePuzzles[currentPuzzle].url;
     try {
-      chrome.tabs.create(
-        {
-          url: puzzlesStore.activePuzzles[currentPuzzle].url,
-          active: true,
-        },
-        (tab) => {
-          // content-script.js is auto-injected via manifest.json content_scripts
-          puzzleTabId = tab.id;
+      // content-script.js is auto-injected via manifest.json content_scripts
+      chrome.tabs.create({ url, active: true }, (tab) => {
+        // Callback-style chrome APIs report failures via lastError, not by
+        // throwing — the try/catch below only covers `chrome` being absent
+        // (plain-web dev mode).
+        if (chrome.runtime.lastError || !tab) {
+          console.error('Failed to open puzzle tab:', chrome.runtime.lastError);
+          window.open(url, '_blank');
+          return;
         }
-      );
-      if (timerRef.getIsPaused()) {
+        puzzleTabId = tab.id ?? null;
+      });
+      if (timerRef?.getIsPaused()) {
         resume();
       }
     } catch (error) {
-      console.log(error);
-      window.open(puzzlesStore.activePuzzles[currentPuzzle].url, '_blank');
+      console.error(error);
+      window.open(url, '_blank');
     }
   }
 
   function start() {
+    if (!timerRef) return;
     reset();
     timerRef.start();
     openPuzzle();
   }
 
   function split() {
-    if (!timerRef.getIsRunning()) {
+    if (!timerRef || !timerRef.getIsRunning()) {
       puzzlesStore.resetCurrentPuzzle();
       return;
     }
@@ -126,6 +146,7 @@
   }
 
   function stop() {
+    if (!timerRef) return;
     timerRef.stop();
     finishTime = timerRef.getFormattedTime();
     if (generalSettingsStore.isConfetti) {
@@ -134,50 +155,58 @@
   }
 
   function reset() {
-    timerRef.reset();
+    timerRef?.reset();
     puzzlesStore.resetCurrentPuzzle();
     splits = [];
     puzzleTabId = null;
     finishTime = null;
   }
 
+  function openPauseTab() {
+    const url = chrome.runtime.getURL(
+      isDarkMode ? 'paused-dark.html' : 'paused.html'
+    );
+    chrome.tabs.create({ url }, (tab) => {
+      if (chrome.runtime.lastError || !tab) {
+        console.error('Failed to open pause tab:', chrome.runtime.lastError);
+        return;
+      }
+      pauseTabId = tab.id ?? null;
+    });
+  }
+
   function pause() {
+    if (!timerRef) return;
     timerRef.pause();
     try {
       if (pauseTabId != null) {
-        try {
-          chrome.tabs.update(pauseTabId, { active: true });
-        } catch (e) {
-          chrome.tabs.create(
-            {
-              url: `${isDarkMode ? chrome.runtime.getURL('paused-dark.html') : chrome.runtime.getURL('paused.html')}`,
-            },
-            (tab) => {
-              pauseTabId = tab.id;
-            }
-          );
-        }
-      } else {
-        chrome.tabs.create(
-          {
-            url: `${isDarkMode ? chrome.runtime.getURL('paused-dark.html') : chrome.runtime.getURL('paused.html')}`,
-          },
-          (tab) => {
-            pauseTabId = tab.id;
+        chrome.tabs.update(pauseTabId, { active: true }, () => {
+          if (chrome.runtime.lastError) {
+            // The pause tab is gone (closed or replaced) — open a fresh one.
+            pauseTabId = null;
+            openPauseTab();
           }
-        );
+        });
+      } else {
+        openPauseTab();
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
   function resume() {
+    if (!timerRef) return;
     timerRef.resume();
+    if (puzzleTabId == null) return;
     try {
-      chrome.tabs.update(puzzleTabId, { active: true });
+      chrome.tabs.update(puzzleTabId, { active: true }, () => {
+        if (chrome.runtime.lastError) {
+          puzzleTabId = null;
+        }
+      });
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 </script>
@@ -192,7 +221,7 @@
       <button
         onclick={() => (isSettingsOverlayOpen = true)}
         class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-        aria-label="Toggle theme"
+        aria-label="Open settings"
       >
         <svg
           width="24"
@@ -312,6 +341,3 @@
 >
   <Share {splits} {finishTime} {puzzles} />
 </Overlay>
-
-<!-- for debug -->
-<!-- <LinkOpener /> -->

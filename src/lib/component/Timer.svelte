@@ -4,8 +4,17 @@
     autoStart = false,
   } = $props();
 
+  // Drift-free timing: instead of accumulating `setInterval` ticks (which
+  // fire late and lose time), we keep the timestamp the current segment
+  // started and derive elapsed time from Date.now(). The interval below
+  // only refreshes the display.
+  let baseTime = initialTime; // ms accumulated before the current segment
+  /** @type {number | null} */
+  let startStamp = null; // Date.now() when the current segment started
+  /** @type {ReturnType<typeof setInterval> | null} */
+  let intervalId = null;
+
   let time = $state(initialTime);
-  let intervalId = $state(null);
   let isRunning = $state(false);
   let isPaused = $state(false);
 
@@ -14,52 +23,74 @@
   const seconds = $derived(Math.floor((time % 60000) / 1000));
   const milliseconds = $derived(time % 1000);
 
+  // Current elapsed time even between display ticks, so splits are exact.
+  function currentTime() {
+    return startStamp != null ? baseTime + (Date.now() - startStamp) : time;
+  }
+
+  /**
+   * @param {number} millisecondsTotal
+   */
+  function format(millisecondsTotal) {
+    const h = Math.floor(millisecondsTotal / 3600000);
+    const m = Math.floor((millisecondsTotal % 3600000) / 60000);
+    const s = Math.floor((millisecondsTotal % 60000) / 1000);
+    const ms = millisecondsTotal % 1000;
+    const tail = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
+    return h > 0 ? `${h.toString().padStart(2, '0')}:${tail}` : tail;
+  }
+
   function getFormattedTime() {
-    if (hours > 0) {
-      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
-    } else {
-      return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+    return format(currentTime());
+  }
+
+  function tick() {
+    if (startStamp != null) {
+      time = baseTime + (Date.now() - startStamp);
     }
   }
 
   function start() {
-    if (!isRunning) {
-      intervalId = setInterval(() => {
-        if (!isPaused) {
-          time += 10;
-        }
-      }, 10);
-      isRunning = true;
-    }
+    if (isRunning) return;
+    isRunning = true;
+    isPaused = false;
+    startStamp = Date.now();
+    intervalId = setInterval(tick, 16);
   }
 
   function stop() {
-    if (isRunning && intervalId) {
-      clearInterval(intervalId);
-      intervalId = null;
-      isRunning = false;
-    }
+    if (!isRunning) return;
+    tick();
+    baseTime = time;
+    startStamp = null;
+    if (intervalId != null) clearInterval(intervalId);
+    intervalId = null;
+    isRunning = false;
   }
 
   function reset() {
     stop();
+    baseTime = initialTime;
     time = initialTime;
+    isPaused = false;
   }
 
   function pause() {
-    if (isRunning && intervalId) {
-      isPaused = true;
-    }
+    if (!isRunning || isPaused) return;
+    tick();
+    baseTime = time;
+    startStamp = null;
+    isPaused = true;
   }
 
   function resume() {
-    if (isRunning && intervalId) {
-      isPaused = false;
-    }
+    if (!isRunning || !isPaused) return;
+    isPaused = false;
+    startStamp = Date.now();
   }
 
   function getTime() {
-    return time;
+    return currentTime();
   }
 
   function getIsRunning() {
@@ -81,6 +112,7 @@
       }
     };
   });
+
   export {
     start,
     stop,

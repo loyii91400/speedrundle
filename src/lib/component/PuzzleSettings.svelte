@@ -5,6 +5,7 @@
   import GameSettings from './GameSettings.svelte';
 
   let puzzles = $derived(puzzlesStore.puzzles);
+  /** @type {string | null} */
   let error = $state(null);
 
   onMount(async () => {
@@ -36,7 +37,7 @@
                 checked={puzzle.active}
                 onchange={(e) => {
                   puzzlesStore.puzzles = puzzlesStore.puzzles.map((p) =>
-                    p === puzzle ? { ...p, active: e.target.checked } : p
+                    p === puzzle ? { ...p, active: e.currentTarget.checked } : p
                   );
                 }}
               />

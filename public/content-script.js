@@ -14,6 +14,8 @@ let puzzleState = null; // { key, winCheck, loseCheck, winReady, loseReady }
 let observer = null;
 let pollInterval = null;
 let heartbeatInterval = null;
+let scanTimer = null;
+const pendingScanTypes = new Set();
 let lastStorageReport = { win: '', lose: '' };
 let done = false;
 
@@ -34,6 +36,11 @@ function clearTimers() {
     clearInterval(heartbeatInterval);
     heartbeatInterval = null;
   }
+  if (scanTimer) {
+    clearTimeout(scanTimer);
+    scanTimer = null;
+  }
+  pendingScanTypes.clear();
 }
 
 function sendResult(status) {
@@ -98,7 +105,9 @@ function readPath(value, segments) {
 function storageKeys(check) {
   if (check.key) return [check.key];
   if (check.keyPrefix) {
-    return Object.keys(localStorage).filter((k) => k.startsWith(check.keyPrefix));
+    return Object.keys(localStorage).filter((k) =>
+      k.startsWith(check.keyPrefix)
+    );
   }
   return [];
 }
@@ -110,7 +119,10 @@ function collectStorageValues(check) {
     const raw = localStorage.getItem(key);
     if (raw === null) continue;
     try {
-      out.push({ key, values: readPath(JSON.parse(raw), check.path.split('.')) });
+      out.push({
+        key,
+        values: readPath(JSON.parse(raw), check.path.split('.')),
+      });
     } catch (e) {
       out.push({ key, values: [], error: String(e) });
     }
@@ -204,6 +216,21 @@ function checkStorageCondition(field, status) {
   }
 }
 
+// DOM mutations arrive in bursts (a single render can produce hundreds), and
+// each scan runs querySelectorAll for every configured check. Debounce bursts
+// into one scan per 50ms. setTimeout rather than requestAnimationFrame so
+// detection still fires (throttled) if the puzzle tab is in the background.
+function scheduleScan(mutationType) {
+  pendingScanTypes.add(mutationType);
+  if (scanTimer) return;
+  scanTimer = setTimeout(() => {
+    scanTimer = null;
+    const types = [...pendingScanTypes];
+    pendingScanTypes.clear();
+    for (const type of types) scan(type);
+  }, 50);
+}
+
 function scan(mutationType) {
   checkCondition(puzzleState?.winCheck, mutationType, 'WIN');
   checkCondition(puzzleState?.loseCheck, mutationType, 'LOSE');
@@ -252,7 +279,7 @@ function arm(puzzle, key) {
   done = false;
   lastStorageReport = { win: '', lose: '' };
   observer = new MutationObserver((mutations) => {
-    for (const mutation of mutations) scan(mutation.type);
+    for (const mutation of mutations) scheduleScan(mutation.type);
   });
   observer.observe(document, {
     childList: true,
@@ -296,7 +323,9 @@ function arm(puzzle, key) {
         warn(`${label}: "${check.query}" is not a valid selector`);
         continue;
       }
-      log(`${label}: DOM "${check.query}" matches ${count} element(s) right now`);
+      log(
+        `${label}: DOM "${check.query}" matches ${count} element(s) right now`
+      );
       const samples = [...document.querySelectorAll(check.query)]
         .slice(0, 3)
         .map((el) => el.textContent.replace(/\s+/g, ' ').trim().slice(0, 80));
@@ -320,16 +349,21 @@ function disarm() {
 
 async function update() {
   try {
-    const result = await chrome.storage.local.get([
-      'puzzles',
-      'currentPuzzle',
-    ]);
+    const result = await chrome.storage.local.get(['puzzles', 'currentPuzzle']);
     if (result.puzzles === undefined || result.currentPuzzle === undefined) {
-      log('No run in progress (puzzles/currentPuzzle missing from storage) — standing by');
+      log(
+        'No run in progress (puzzles/currentPuzzle missing from storage) — standing by'
+      );
       disarm();
       return;
     }
-    const active = JSON.parse(result.puzzles)
+    // Puzzles are stored as a plain object now; older versions stored a
+    // JSON string, so accept both.
+    const savedPuzzles =
+      typeof result.puzzles === 'string'
+        ? JSON.parse(result.puzzles)
+        : result.puzzles;
+    const active = savedPuzzles
       .filter((p) => p.active)
       .sort((a, b) => a.index - b.index);
     const puzzle = active[result.currentPuzzle];

@@ -1,16 +1,26 @@
-// @class puzzle
-// @field name string - The name of the puzzle
-// @field url string - The url to the puzzle
-// @field icon string - The url to the icon
-// @field active boolean - Whether the puzzle is active
-// @field index number - The index of the puzzle
-// @field winCheck { mutationType?: string, query: string, text?: string | string[] } | { type: 'storage', key?: string, keyPrefix?: string, path: string, equals: any } - The win check configuration. Storage checks read localStorage; "key" reads one entry, "keyPrefix" scans all entries starting with it, and a "*" path segment scans every array element/object value (e.g. "states.*.data.status").
-// @field loseCheck same shape as winCheck, or null to only detect wins
+/**
+ * A DOM-based check watches for an element (optionally with matching text);
+ * a storage check reads values the game writes to localStorage. For storage
+ * checks, "key" reads one entry, "keyPrefix" scans all entries starting with
+ * it, and a "*" path segment scans every array element/object value
+ * (e.g. "states.*.data.status").
+ *
+ * @typedef {{ mutationType?: string, query: string, text?: string | string[] } | { type: 'storage', key?: string, keyPrefix?: string, path: string, equals: any }} PuzzleCheck
+ *
+ * @typedef {object} Puzzle
+ * @property {string} name
+ * @property {string} url
+ * @property {string} icon
+ * @property {boolean} active
+ * @property {number} index
+ * @property {PuzzleCheck} winCheck
+ * @property {PuzzleCheck | null} loseCheck - null to only detect wins
+ */
 
-// Configuration flag to determine storage method
-export const isDebug = import.meta.env.DEV; // Set this based on your debug environment
+import { storageGet, storageSet } from './storage.js';
 
 // Initial puzzle list
+/** @type {Puzzle[]} */
 const initialPuzzles = [];
 
 function createPuzzles() {
@@ -24,6 +34,9 @@ function createPuzzles() {
     get activePuzzles() {
       return puzzles.filter((p) => p.active).sort((a, b) => a.index - b.index);
     },
+    /**
+     * @param {Puzzle[]} value
+     */
     set puzzles(value) {
       puzzles = value;
       if (puzzles.length > 0) {
@@ -33,6 +46,9 @@ function createPuzzles() {
     get currentPuzzle() {
       return currentPuzzle;
     },
+    /**
+     * @param {number} value
+     */
     setCurrentPuzzle(value) {
       currentPuzzle = value;
       this.save();
@@ -45,39 +61,43 @@ function createPuzzles() {
       currentPuzzle = 0;
       this.save();
     },
-    addPuzzle: (puzzle) => {
+    /**
+     * @param {Puzzle} puzzle
+     */
+    addPuzzle(puzzle) {
       puzzles = [...puzzles, puzzle];
       this.save();
     },
-    removePuzzle: (puzzleUrl) => {
+    /**
+     * @param {string} puzzleUrl
+     */
+    removePuzzle(puzzleUrl) {
       puzzles = puzzles.filter((p) => p.url !== puzzleUrl);
       this.save();
     },
-    clearPuzzles: () => {
+    clearPuzzles() {
       puzzles = [];
       this.save();
     },
-    load: () => {
-      if (isDebug) {
-        const savedPuzzles = localStorage.getItem('puzzles');
-        if (savedPuzzles) {
-          puzzles = JSON.parse(savedPuzzles);
-        }
-      } else {
-        chrome.storage.local.get(['puzzles', 'currentPuzzle'], (result) => {
-          if (result.puzzles) {
-            puzzles = JSON.parse(result.puzzles);
-          }
-        });
+    async load() {
+      const result = await storageGet(['puzzles', 'currentPuzzle']);
+      // Backward compatibility: versions before the shared storage helper
+      // stored puzzles as a JSON string in chrome.storage.local.
+      const saved =
+        typeof result.puzzles === 'string'
+          ? JSON.parse(result.puzzles)
+          : result.puzzles;
+      if (Array.isArray(saved)) {
+        puzzles = saved;
+      }
+      // Restore progress too — without this, a panel reload mid-run showed
+      // puzzle 0 while the content script was armed for a later one.
+      if (typeof result.currentPuzzle === 'number') {
+        currentPuzzle = result.currentPuzzle;
       }
     },
-    save: () => {
-      if (isDebug) {
-        localStorage.setItem('puzzles', JSON.stringify(puzzles));
-      } else {
-        chrome.storage.local.set({ puzzles: JSON.stringify(puzzles) });
-        chrome.storage.local.set({ currentPuzzle });
-      }
+    save() {
+      storageSet({ puzzles, currentPuzzle });
     },
   };
 }

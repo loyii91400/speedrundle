@@ -1,61 +1,7 @@
 <script>
-  import { onMount } from 'svelte';
-  import { getIsDarkMode, setIsDarkMode } from '../store/theme.svelte.js';
+  import { getIsDarkMode, toggleTheme } from '../store/theme.svelte.js';
 
   let isDarkMode = $derived(getIsDarkMode());
-  const isDebug = import.meta.env.DEV;
-
-  export function toggleTheme() {
-    setIsDarkMode(!isDarkMode);
-    updateTheme();
-  }
-
-  export function updateTheme() {
-    if (isDebug) {
-      localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-    } else {
-      chrome.storage.local.set({ theme: isDarkMode ? 'dark' : 'light' });
-    }
-
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }
-
-  onMount(() => {
-    if (isDebug) {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme) {
-        setIsDarkMode(savedTheme === 'dark');
-        // isDarkMode = savedTheme === 'dark';
-        updateTheme();
-      } else if (
-        window.matchMedia &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches
-      ) {
-        setIsDarkMode(true);
-        // isDarkMode = true;
-        updateTheme();
-      }
-    } else {
-      chrome.storage.local.get(['theme'], (result) => {
-        if (result.theme) {
-          // isDarkMode = result.theme === 'dark';
-          setIsDarkMode(result.theme === 'dark');
-          updateTheme();
-        } else if (
-          window.matchMedia &&
-          window.matchMedia('(prefers-color-scheme: dark)').matches
-        ) {
-          // isDarkMode = true;
-          setIsDarkMode(true);
-          updateTheme();
-        }
-      });
-    }
-  });
 </script>
 
 <button

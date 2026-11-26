@@ -10,7 +10,7 @@
       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
       checked={generalSettingsStore.isConfetti}
       onchange={(e) => {
-        generalSettingsStore.isConfetti = e.target.checked;
+        generalSettingsStore.isConfetti = e.currentTarget.checked;
       }}
     />
     Show Confetti
@@ -21,7 +21,7 @@
       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
       checked={generalSettingsStore.isAllowPause}
       onchange={(e) => {
-        generalSettingsStore.isAllowPause = e.target.checked;
+        generalSettingsStore.isAllowPause = e.currentTarget.checked;
       }}
     />
     Allow Pause
@@ -32,7 +32,7 @@
       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
       checked={generalSettingsStore.isShowGiveUp}
       onchange={(e) => {
-        generalSettingsStore.isShowGiveUp = e.target.checked;
+        generalSettingsStore.isShowGiveUp = e.currentTarget.checked;
       }}
     />
     Show Give Up Buttons (Closing a Tab will still DNF)
