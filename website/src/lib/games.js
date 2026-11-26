@@ -28,6 +28,7 @@ import catalogue from '$lib/data/games.json';
  * @property {string} description
  * @property {WinCheck | null} winCheck
  * @property {WinCheck | null} loseCheck
+ * @property {{ query: string, text?: string | string[] } | null} [scoreButton] - Share control clicked after completion to capture its result text
  */
 
 /** GitHub repository for the extension. */

@@ -7,6 +7,7 @@ Install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/
 ## How it works
 
 - The extension's **side panel** (a Svelte app) drives the run: it opens each puzzle in a tab, tracks the timer, and records splits.
+- Game results are captured automatically after completion using each game's configurable `scoreButton` rule in `website/src/lib/data/games.json`. The copied result text and split time are saved beside each puzzle for the **current run only**, along with the final time. Starting or resetting a run replaces that saved state. Manual Share clicks remain available as a fallback.
 - A **content script** is injected into supported puzzle sites. When the tab shows the current puzzle, it watches for the configured win/lose condition — either a DOM element (e.g. a "Congratulations!" heading) or a value the game writes to `localStorage` — and reports `GAME_FINISHED` back to the side panel.
 - Closing the puzzle tab counts as a DNF. Pausing opens an interstitial tab so you can't peek at the puzzle.
 
@@ -46,7 +47,8 @@ npm run format   # prettier
 ```
 public/             Static extension assets (manifest, content script, links.json)
   manifest.json     MV3 manifest; registers the content script per puzzle site
-  content-script.js Win/lose detection, injected into puzzle tabs
+  content-script.js Win/lose detection and automatic Share-button triggering
+  clipboard-listener.js Captures Clipboard API, native Share, and legacy copy results
   links.json        Puzzle catalogue (URLs, icons, categories, publishers, win/lose checks)
 src/
   App.svelte        Side panel: run state, tab management, pause/resume

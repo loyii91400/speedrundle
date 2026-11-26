@@ -21,6 +21,7 @@
  * @property {number} index
  * @property {PuzzleCheck} winCheck
  * @property {PuzzleCheck | null} loseCheck - null to only detect wins
+ * @property {{ query: string, text?: string | string[] } | null} [scoreButton] - Share control clicked after completion to capture the copied result
  */
 
 import { storageGet, storageSet } from './storage.js';
@@ -49,6 +50,8 @@ function normalizeSavedPuzzles(value) {
 function createPuzzles() {
   let puzzles = $state(initialPuzzles);
   let currentPuzzle = $state(0);
+  /** @type {string | null} */
+  let currentRunId = $state(null);
 
   return {
     get puzzles() {
@@ -68,6 +71,22 @@ function createPuzzles() {
     },
     get currentPuzzle() {
       return currentPuzzle;
+    },
+    get currentRunId() {
+      return currentRunId;
+    },
+    startNewRun() {
+      currentPuzzle = 0;
+      currentRunId =
+        globalThis.crypto?.randomUUID?.() ??
+        `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      this.save();
+      return currentRunId;
+    },
+    clearCurrentRun() {
+      currentPuzzle = 0;
+      currentRunId = null;
+      this.save();
     },
     /**
      * @param {number} value
@@ -103,7 +122,11 @@ function createPuzzles() {
       this.save();
     },
     async load() {
-      const result = await storageGet(['puzzles', 'currentPuzzle']);
+      const result = await storageGet([
+        'puzzles',
+        'currentPuzzle',
+        'currentRunId',
+      ]);
       const saved = normalizeSavedPuzzles(result.puzzles);
       if (saved) {
         puzzles = saved;
@@ -113,9 +136,16 @@ function createPuzzles() {
       if (typeof result.currentPuzzle === 'number') {
         currentPuzzle = result.currentPuzzle;
       }
+      if (typeof result.currentRunId === 'string') {
+        currentRunId = result.currentRunId;
+      }
     },
     save() {
-      storageSet({ puzzles: $state.snapshot(puzzles), currentPuzzle });
+      storageSet({
+        puzzles: $state.snapshot(puzzles),
+        currentPuzzle,
+        currentRunId,
+      });
     },
   };
 }

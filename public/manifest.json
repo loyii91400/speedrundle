@@ -27,6 +27,18 @@
       ],
       "js": ["content-script.js"],
       "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.nytimes.com/*",
+        "https://www.thewikigamedaily.com/*",
+        "https://bandle.app/*",
+        "https://towerofquestions.com/*",
+        "https://krillion.io/*"
+      ],
+      "js": ["clipboard-listener.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
     }
   ],
   "background": {

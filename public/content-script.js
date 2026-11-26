@@ -1,8 +1,9 @@
 // Speedrundle win/lose detector.
 //
 // Registered in manifest.json ("content_scripts"), so Chrome injects this on
-// the configured puzzle sites. It arms itself only when this tab shows the
-// current puzzle; on any other page it exits immediately.
+// configured puzzle sites. The win/lose detector arms itself only when this tab
+// shows the current puzzle. Completion triggers the game's configured Share
+// action, and score capture remains available afterward as a manual fallback.
 //
 // IMPORTANT: logs from this file go to the DevTools console of the PAGE this
 // script runs on (the puzzle tab) — never to the extension's service worker
@@ -19,6 +20,7 @@ const pendingScanTypes = new Set();
 let lastStorageReport = { win: '', lose: '' };
 let done = false;
 let lastPageUrl = location.href;
+let scorePuzzle = null; // { name, url } for this page's configured game
 
 function log(...args) {
   console.log(TAG, ...args);
@@ -50,6 +52,7 @@ function sendResult(status) {
   observer?.disconnect();
   observer = null;
   clearTimers();
+  captureScore(puzzleState?.scoreButton);
   log(`${status} detected — notifying the side panel`);
   try {
     chrome.runtime
@@ -60,6 +63,34 @@ function sendResult(status) {
       );
   } catch (e) {
     warn('GAME_FINISHED could not be delivered (extension reloaded?):', e);
+  }
+}
+
+function sendPuzzleScore(resultText) {
+  if (!scorePuzzle || typeof resultText !== 'string' || !resultText.trim()) {
+    return false;
+  }
+
+  try {
+    chrome.runtime
+      .sendMessage({
+        type: 'PUZZLE_SCORE',
+        data: {
+          gameName: scorePuzzle.name,
+          gameUrl: scorePuzzle.url,
+          resultText,
+          runId: scorePuzzle.runId ?? null,
+          puzzleIndex: scorePuzzle.puzzleIndex ?? null,
+        },
+      })
+      .then(() => log(`Saved ${scorePuzzle.name} Share result`))
+      .catch((e) =>
+        warn('PUZZLE_SCORE could not be delivered (side panel closed?):', e)
+      );
+    return true;
+  } catch (e) {
+    warn('PUZZLE_SCORE could not be delivered (extension reloaded?):', e);
+    return false;
   }
 }
 
@@ -269,6 +300,61 @@ function countDomMatches(check) {
   }
 }
 
+function findScoreButton(check) {
+  if (!check?.query) return null;
+  const texts = (Array.isArray(check.text) ? check.text : [check.text])
+    .filter((text) => typeof text === 'string')
+    .map((text) => text.trim().toLowerCase())
+    .filter(Boolean);
+  let elements;
+  try {
+    elements = document.querySelectorAll(check.query);
+  } catch {
+    warn(`Invalid scoreButton selector "${check.query}"`);
+    return null;
+  }
+
+  for (const elem of elements) {
+    if (typeof elem.checkVisibility === 'function' && !elem.checkVisibility()) {
+      continue;
+    }
+    const labels = [
+      elem.innerText,
+      elem.textContent,
+      elem.getAttribute?.('aria-label'),
+      elem.getAttribute?.('title'),
+      elem.value,
+    ]
+      .filter((value) => typeof value === 'string')
+      .map((value) => value.replace(/\s+/g, ' ').trim().toLowerCase())
+      .filter(Boolean);
+    if (texts.length === 0 || texts.some((text) => labels.includes(text))) {
+      return elem;
+    }
+  }
+  return null;
+}
+
+// Result dialogs can render shortly after a storage-based win is visible.
+// Retry briefly, then click the configured Share control once. The MAIN-world
+// hook captures attempted clipboard writes even if browser permission denies
+// the actual background write.
+function captureScore(check, attemptsRemaining = 20) {
+  if (!check || typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent('speedrundle:capture-result'));
+  const button = findScoreButton(check);
+  if (button) {
+    button.click();
+    log('Clicked the configured Share button to capture the game result');
+    return;
+  }
+  if (attemptsRemaining > 0) {
+    setTimeout(() => captureScore(check, attemptsRemaining - 1), 100);
+  } else {
+    warn('No visible Share button matched scoreButton; result not captured');
+  }
+}
+
 // DOM checks only. Storage checks are handled by checkStorageCondition.
 function checkCondition(check, mutationType, status) {
   if (!check || check.type === 'storage' || done) return;
@@ -397,6 +483,7 @@ function arm(puzzle, key) {
     key,
     winCheck,
     loseCheck,
+    scoreButton: puzzle.scoreButton ?? null,
     winWatch: createStorageWatch(winCheck),
     loseWatch: createStorageWatch(loseCheck),
   };
@@ -484,7 +571,11 @@ function normalizeSavedPuzzles(value) {
 
 async function update() {
   try {
-    const result = await chrome.storage.local.get(['puzzles', 'currentPuzzle']);
+    const result = await chrome.storage.local.get([
+      'puzzles',
+      'currentPuzzle',
+      'currentRunId',
+    ]);
     if (result.puzzles === undefined || result.currentPuzzle === undefined) {
       log(
         'No run in progress (puzzles/currentPuzzle missing from storage) — standing by'
@@ -498,6 +589,18 @@ async function update() {
       disarm();
       return;
     }
+    const pagePuzzle = savedPuzzles.find((puzzle) =>
+      urlMatchesPuzzle(puzzle.url)
+    );
+    if (pagePuzzle && scorePuzzle?.url !== pagePuzzle.url) {
+      scorePuzzle = {
+        name: pagePuzzle.name,
+        url: pagePuzzle.url,
+        runId: null,
+        puzzleIndex: null,
+      };
+    }
+
     const active = savedPuzzles
       .filter((p) => p.active)
       .sort((a, b) => a.index - b.index);
@@ -513,8 +616,15 @@ async function update() {
     log(
       `Current puzzle is "${puzzle.name}" (${puzzle.url}) — URL ${urlMatch ? 'MATCHES' : 'does NOT match'} this page`
     );
-    const key = `${result.currentPuzzle}:${puzzle.url}:${JSON.stringify([puzzle.winCheck, puzzle.loseCheck])}`;
+    const key = `${result.currentPuzzle}:${result.currentRunId ?? 'no-run'}:${puzzle.url}:${JSON.stringify([puzzle.winCheck, puzzle.loseCheck, puzzle.scoreButton])}`;
     if (urlMatch) {
+      scorePuzzle = {
+        name: puzzle.name,
+        url: puzzle.url,
+        runId:
+          typeof result.currentRunId === 'string' ? result.currentRunId : null,
+        puzzleIndex: result.currentPuzzle,
+      };
       if (puzzleState?.key !== key) arm(puzzle, key);
     } else if (
       puzzleState?.key === key &&
@@ -548,8 +658,20 @@ setInterval(() => {
 
 // Re-evaluate when a run starts or advances while this tab stays open.
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && (changes.puzzles || changes.currentPuzzle)) {
+  if (
+    area === 'local' &&
+    (changes.puzzles || changes.currentPuzzle || changes.currentRunId)
+  ) {
     log('Puzzle storage changed — re-evaluating');
     update();
   }
 });
+
+// clipboard-listener.js runs in the MAIN world and emits the exact text copied
+// by a Share/Copy control. Keep scorePuzzle after disarming so the result can
+// still be saved when the user returns to a finished puzzle and clicks Share.
+if (typeof window !== 'undefined') {
+  window.addEventListener('speedrundle:game-result', (event) => {
+    sendPuzzleScore(event.detail);
+  });
+}

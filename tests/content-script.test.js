@@ -19,6 +19,18 @@ function createHarness(initialStorage = {}) {
   }
 
   const messages = [];
+  const dispatchedEvents = [];
+  const windowListeners = {};
+  const document = { querySelectorAll: () => [] };
+  const window = {
+    addEventListener(type, listener) {
+      windowListeners[type] = listener;
+    },
+    dispatchEvent(event) {
+      dispatchedEvents.push(event);
+      windowListeners[event.type]?.(event);
+    },
+  };
   const context = vm.createContext({
     console: { log() {}, warn() {}, error() {} },
     localStorage,
@@ -27,7 +39,14 @@ function createHarness(initialStorage = {}) {
       origin: 'https://www.nytimes.com',
       pathname: '/games/wordle/index.html',
     },
-    document: { querySelectorAll: () => [] },
+    document,
+    window,
+    CustomEvent: class {
+      constructor(type, options = {}) {
+        this.type = type;
+        this.detail = options.detail;
+      }
+    },
     MutationObserver: class {
       observe() {}
       disconnect() {}
@@ -51,13 +70,15 @@ function createHarness(initialStorage = {}) {
     clearTimeout() {},
   });
   vm.runInContext(
-    `${source}\nglobalThis.__test = { arm, scan, collectStorageEntries, normalizeStorageCheck };`,
+    `${source}\nglobalThis.__test = { arm, scan, collectStorageEntries, normalizeStorageCheck, sendPuzzleScore, findScoreButton, setScorePuzzle: (value) => { scorePuzzle = value; } };`,
     context
   );
 
   return {
     api: context.__test,
     messages,
+    document,
+    dispatchedEvents,
     set(key, value) {
       localStorage[key] = JSON.stringify(value);
     },
@@ -314,4 +335,71 @@ test('Connections still reports a current-day loss with historical wins present'
   });
   harness.api.scan(null);
   assert.deepEqual(harness.statuses(), ['LOSE']);
+});
+
+test('completion clicks the configured Share control', () => {
+  const harness = createHarness();
+  let clicks = 0;
+  const shareButton = {
+    innerText: 'Share',
+    textContent: 'Share',
+    checkVisibility: () => true,
+    getAttribute: () => null,
+    click() {
+      clicks++;
+    },
+  };
+  harness.document.querySelectorAll = (query) =>
+    query === 'button' ? [shareButton] : [];
+  harness.api.arm(
+    {
+      name: 'Test puzzle',
+      url: 'https://www.nytimes.com/games/wordle/index.html',
+      winCheck: wordleWin,
+      loseCheck: null,
+      scoreButton: { query: 'button', text: 'Share' },
+    },
+    'test'
+  );
+  harness.set(wordleKey, {
+    states: { today: { data: { status: 'WIN' } } },
+  });
+
+  harness.api.scan(null);
+
+  assert.equal(clicks, 1);
+  assert.ok(
+    harness.dispatchedEvents.some(
+      (event) => event.type === 'speedrundle:capture-result'
+    )
+  );
+});
+
+test('Share text is sent with the configured game identity', () => {
+  const harness = createHarness();
+  harness.api.setScorePuzzle({
+    name: 'Wordle',
+    url: 'https://www.nytimes.com/games/wordle/index.html',
+    runId: 'run-1',
+    puzzleIndex: 2,
+  });
+  const resultText = 'Wordle 1,234 4/6\n\n🟨⬛🟩';
+
+  assert.equal(harness.api.sendPuzzleScore(resultText), true);
+  const message = harness.messages.at(-1);
+  assert.equal(message.type, 'PUZZLE_SCORE');
+  assert.equal(message.data.gameName, 'Wordle');
+  assert.equal(
+    message.data.gameUrl,
+    'https://www.nytimes.com/games/wordle/index.html'
+  );
+  assert.equal(message.data.resultText, resultText);
+  assert.equal(message.data.runId, 'run-1');
+  assert.equal(message.data.puzzleIndex, 2);
+});
+
+test('Share text is ignored when the page has no configured game', () => {
+  const harness = createHarness();
+  assert.equal(harness.api.sendPuzzleScore('Unrelated clipboard text'), false);
+  assert.deepEqual(harness.messages, []);
 });

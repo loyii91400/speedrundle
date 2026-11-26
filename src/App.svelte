@@ -7,6 +7,7 @@
   import PuzzleList from './lib/component/PuzzleList.svelte';
   import Share from './lib/component/Share.svelte';
   import puzzlesStore from './lib/store/puzzles.svelte.js';
+  import currentRunStore from './lib/store/currentRun.svelte.js';
   import { fetchPuzzles } from './lib/puzzleFetcher.js';
   import nextPuzzleStore from './lib/store/nextPuzzle.svelte';
   import generalSettingsStore from './lib/store/generalSettings.svelte';
@@ -49,6 +50,12 @@
     puzzlesReady = (async () => {
       try {
         await puzzlesStore.load();
+        await currentRunStore.load();
+        if (currentRunStore.runId !== puzzlesStore.currentRunId) {
+          await currentRunStore.startRun(puzzlesStore.currentRunId);
+        }
+        splits = [...currentRunStore.splits];
+        finishTime = currentRunStore.finishTime;
         const { error } = await fetchPuzzles();
         if (error)
           console.error('Failed to refresh puzzle definitions:', error);
@@ -132,7 +139,9 @@
     if (!timerRef) return;
     await puzzlesReady;
     if (!timerRef) return;
-    reset();
+    resetRunState();
+    const runId = puzzlesStore.startNewRun();
+    currentRunStore.startRun(runId);
     timerRef.start();
     openPuzzle();
   }
@@ -148,6 +157,7 @@
     } else {
       splits = [...splits, timerRef.getFormattedTime()];
     }
+    currentRunStore.setSplit(splits.length - 1, splits[splits.length - 1]);
 
     nextPuzzleStore.nextPuzzle = false;
     openPuzzle();
@@ -162,17 +172,23 @@
     if (!timerRef) return;
     timerRef.stop();
     finishTime = timerRef.getFormattedTime();
+    currentRunStore.setFinishTime(finishTime);
     if (generalSettingsStore.isConfetti) {
       confetti();
     }
   }
 
-  function reset() {
+  function resetRunState() {
     timerRef?.reset();
-    puzzlesStore.resetCurrentPuzzle();
     splits = [];
     puzzleTabId = null;
     finishTime = null;
+  }
+
+  function reset() {
+    puzzlesStore.clearCurrentRun();
+    currentRunStore.startRun(null);
+    resetRunState();
   }
 
   function openPauseTab() {
@@ -329,14 +345,17 @@
       {splits}
       {currentPuzzle}
       {timerRef}
+      gameScores={currentRunStore.currentScores}
       giveUpCB={dnfCurrentPuzzle}
       allowReorder={!timerRef?.getIsRunning()}
     />
+    {#if currentRunStore.error}
+      <p class="text-sm text-rose-500" role="alert">{currentRunStore.error}</p>
+    {/if}
     {#if finishTime != null}
       <button
         class="cursor-pointer font-semibold text-amber-600 transition-colors hover:text-amber-500 dark:text-amber-400 dark:hover:text-amber-300"
-        onclick={() => (isShareOverlayOpen = true)}
-        >Share your score</button
+        onclick={() => (isShareOverlayOpen = true)}>Share your score</button
       >
     {/if}
     <p class="mt-4 text-center text-sm text-zinc-500 dark:text-zinc-400">

@@ -1,5 +1,5 @@
 {
-  "categories": ["Words", "Crossword", "Trivia", "Music"],
+  "categories": ["Words", "Trivia", "Music"],
   "games": [
     {
       "slug": "wordle",
@@ -22,6 +22,10 @@
         "entryPath": "states.*",
         "path": "data.status",
         "equals": "FAIL"
+      },
+      "scoreButton": {
+        "query": "button, [role='button']",
+        "text": "Share"
       }
     },
     {
@@ -39,7 +43,11 @@
         "path": "data.isSolved",
         "equals": true
       },
-      "loseCheck": null
+      "loseCheck": null,
+      "scoreButton": {
+        "query": "button, [role='button']",
+        "text": "Share"
+      }
     },
     {
       "slug": "connections",
@@ -62,6 +70,10 @@
         "entryPath": "states.*",
         "path": "data.puzzleComplete",
         "equals": true
+      },
+      "scoreButton": {
+        "query": "button, [role='button']",
+        "text": "Share"
       }
     },
     {
@@ -78,7 +90,18 @@
         "path": "daysCompleted",
         "increases": true
       },
-      "loseCheck": null
+      "loseCheck": null,
+      "scoreButton": {
+        "query": "button, [role='button']",
+        "text": [
+          "Share",
+          "Share result",
+          "Share results",
+          "Copy result",
+          "Copy results",
+          "Copy score"
+        ]
+      }
     },
     {
       "slug": "bandle",
@@ -101,6 +124,10 @@
         "idPath": "gameId",
         "path": "loose",
         "equals": true
+      },
+      "scoreButton": {
+        "query": "button, [role='button']",
+        "text": "Share"
       }
     },
     {
@@ -122,6 +149,17 @@
         "keyPrefix": "tower-of-questions:prototype-run:",
         "path": "state.status",
         "equals": "lost"
+      },
+      "scoreButton": {
+        "query": "button, [role='button']",
+        "text": [
+          "Share",
+          "Share result",
+          "Share results",
+          "Copy result",
+          "Copy results",
+          "Copy score"
+        ]
       }
     },
     {
@@ -136,7 +174,18 @@
         "query": "span.text-drift",
         "text": " complete"
       },
-      "loseCheck": null
+      "loseCheck": null,
+      "scoreButton": {
+        "query": "button, [role='button']",
+        "text": [
+          "Share",
+          "Share result",
+          "Share results",
+          "Copy result",
+          "Copy results",
+          "Copy score"
+        ]
+      }
     }
   ]
 }

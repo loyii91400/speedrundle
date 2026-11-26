@@ -3,13 +3,14 @@
   import generalSettingsStore from '../store/generalSettings.svelte';
 
   /**
-   * @type {{ currentPuzzle: number, timerRef: { getIsRunning: () => boolean, getIsPaused: () => boolean, getFormattedTime: () => string } | null, allowReorder?: boolean, splits?: string[], giveUpCB: () => void }}
+   * @type {{ currentPuzzle: number, timerRef: { getIsRunning: () => boolean, getIsPaused: () => boolean, getFormattedTime: () => string } | null, allowReorder?: boolean, splits?: string[], gameScores?: Record<number, string>, giveUpCB: () => void }}
    */
   let {
     currentPuzzle,
     timerRef,
     allowReorder = true,
     splits = [],
+    gameScores = {},
     giveUpCB,
   } = $props();
 
@@ -80,7 +81,9 @@
 </script>
 
 {#if puzzleStore.activePuzzles.length === 0}
-  <div class="text-zinc-500 dark:text-zinc-400">First time here? Click the settings icon.</div>
+  <div class="text-zinc-500 dark:text-zinc-400">
+    First time here? Click the settings icon.
+  </div>
 {/if}
 <div
   class="flex flex-auto overflow-y-auto flex-col gap-2
@@ -94,12 +97,13 @@
 >
   {#each puzzleStore.activePuzzles as puzzle, index}
     {@const isActive = currentPuzzle === index && timerRef?.getIsRunning()}
+    {@const resultText = gameScores[index]}
     <div
       class={[
-        'flex w-64 items-center gap-2 rounded-xl border p-2 transition-colors',
+        'flex w-80 items-center gap-2 rounded-xl border p-2 transition-colors',
         isActive
           ? 'border-amber-400/70 bg-amber-400/5'
-          : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900/60'
+          : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900/60',
       ]}
       draggable={allowReorder}
       role="option"
@@ -125,9 +129,15 @@
           d="M4 6h16M4 12h16M4 18h16"
         />
       </svg>
-      <img width="32" height="32" src={puzzle.icon} alt={puzzle.name} class="rounded-lg" />
+      <img
+        width="32"
+        height="32"
+        src={puzzle.icon}
+        alt={puzzle.name}
+        class="rounded-lg"
+      />
       <button
-        class="cursor-pointer font-medium hover:text-amber-600 dark:hover:text-amber-300"
+        class="min-w-0 flex-1 cursor-pointer truncate text-left font-medium hover:text-amber-600 dark:hover:text-amber-300"
         onclick={() => openPuzzle(puzzle.url)}>{puzzle.name}</button
       >
       {#if currentPuzzle === index && timerRef?.getIsRunning() && !timerRef?.getIsPaused()}
@@ -142,12 +152,19 @@
           </div>
         {/if}
       {:else}
-        <div
-          class="ml-auto font-mono tabular-nums {splits[index] === 'DNF'
-            ? 'text-rose-500'
-            : 'text-emerald-600 dark:text-emerald-400'}"
-        >
-          {splits[index] ?? ''}
+        <div class="ml-auto flex items-start gap-2">
+          {#if resultText}
+            <pre
+              class="m-0 max-h-32 max-w-36 overflow-auto font-mono text-[10px] leading-tight whitespace-pre-wrap text-zinc-600 dark:text-zinc-300"
+              aria-label="Copied {puzzle.name} result">{resultText}</pre>
+          {/if}
+          <div
+            class="shrink-0 font-mono tabular-nums {splits[index] === 'DNF'
+              ? 'text-rose-500'
+              : 'text-emerald-600 dark:text-emerald-400'}"
+          >
+            {splits[index] ?? ''}
+          </div>
         </div>
       {/if}
     </div>

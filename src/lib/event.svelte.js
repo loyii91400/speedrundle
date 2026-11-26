@@ -1,5 +1,6 @@
 import puzzlesStore from './store/puzzles.svelte.js';
 import nextPuzzleStore from './store/nextPuzzle.svelte';
+import currentRunStore from './store/currentRun.svelte.js';
 
 try {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -14,6 +15,9 @@ try {
         nextPuzzleStore.nextPuzzle = true;
         nextPuzzleStore.dnf = true;
       }
+      sendResponse({ status: 'received' });
+    } else if (message.type === 'PUZZLE_SCORE') {
+      currentRunStore.addScore(message.data);
       sendResponse({ status: 'received' });
     }
   });

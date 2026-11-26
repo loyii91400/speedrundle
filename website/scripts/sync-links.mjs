@@ -5,8 +5,8 @@
  *   1. Writes `public/links.json` (what the extension side panel loads), stripping
  *      website-only fields (slug, description). Category and publisher are kept —
  *      the extension's puzzle settings use them for search and filtering.
- *   2. Updates the content-script `matches` in `public/manifest.json` so the
- *      win/lose detection script is injected on every game's site.
+ *   2. Updates every content-script `matches` list in `public/manifest.json` so
+ *      detection and Share-result capture are injected on every game's site.
  *
  * Run from the website directory: npm run sync:links
  */
@@ -39,16 +39,19 @@ const links = catalogue.games.map((game) => ({
   category: game.category,
   publisher: game.publisher,
   winCheck: game.winCheck,
-  loseCheck: game.loseCheck
+  loseCheck: game.loseCheck,
+  scoreButton: game.scoreButton
 }));
 const linksPath = fileURLToPath(new URL('../../public/links.json', import.meta.url));
 await writeJson(linksPath, links);
 console.log(`wrote ${links.length} games to public/links.json`);
 
-// 2. Content-script matches: every game's origin, so detection runs everywhere.
+// 2. Content-script matches: every game's origin, so all page hooks run everywhere.
 const manifestPath = fileURLToPath(new URL('../../public/manifest.json', import.meta.url));
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 const matches = [...new Set(links.map((game) => `${new URL(game.url).origin}/*`))];
-manifest.content_scripts[0].matches = matches;
+for (const contentScript of manifest.content_scripts) {
+  contentScript.matches = matches;
+}
 await writeJson(manifestPath, manifest);
 console.log(`updated content-script matches: ${matches.join(', ')}`);
