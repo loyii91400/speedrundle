@@ -126,19 +126,19 @@
   };
 </script>
 
-<div class="timer">
+<div class="timer font-mono tabular-nums">
   {#if hours > 0}
-    <span class="hours text-4xl text-green-600"
+    <span class="hours text-4xl font-semibold text-green-600"
       >{hours.toString().padStart(2, '0')}:</span
     >
   {/if}
-  <span class="minutes text-4xl text-green-600"
+  <span class="minutes text-4xl font-semibold text-green-600"
     >{minutes.toString().padStart(2, '0')}:</span
   >
-  <span class="seconds text-4xl text-green-600"
+  <span class="seconds text-4xl font-semibold text-green-600"
     >{seconds.toString().padStart(2, '0')}</span
   >
-  <span class="milliseconds text-green-700"
+  <span class="milliseconds text-green-700 dark:text-green-600"
     >.{milliseconds.toString().padStart(3, '0')}</span
   >
 </div>

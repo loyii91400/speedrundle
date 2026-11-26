@@ -25,9 +25,9 @@
       <div class="flex gap-2">
         <div>{puzzle.name}</div>
         <div
-          class="ml-auto {splits[index] === 'DNF'
-            ? 'text-red-500'
-            : 'text-green-500'}"
+          class="ml-auto font-mono tabular-nums {splits[index] === 'DNF'
+            ? 'text-rose-500'
+            : 'text-emerald-600 dark:text-emerald-400'}"
         >
           {splits[index] ?? ''}
         </div>
@@ -36,7 +36,7 @@
   </div>
   <button
     onclick={copyToClipboard}
-    class="w-40 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md"
+    class="w-40 h-10 cursor-pointer rounded-lg bg-amber-400 font-semibold text-zinc-950 transition-colors hover:bg-amber-300"
     >{copied ? 'Copied!' : 'Copy to clipboard'}</button
   >
 </div>

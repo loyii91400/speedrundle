@@ -11,6 +11,8 @@
  * @property {string} name
  * @property {string} url
  * @property {string} icon
+ * @property {string} [category] - e.g. Words, Trivia, Music (from links.json)
+ * @property {string} [publisher]
  * @property {boolean} active
  * @property {number} index
  * @property {PuzzleCheck} winCheck

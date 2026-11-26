@@ -23,20 +23,6 @@
       }
     },
     {
-      "slug": "mini",
-      "name": "The Mini",
-      "url": "https://www.nytimes.com/crosswords/game/mini",
-      "icon": "https://www.nytimes.com/games-assets/v2/metadata/nyt-apple-touch-icon.png?v=v2504091256",
-      "category": "Crossword",
-      "publisher": "The New York Times",
-      "description": "A bite-sized 5×5 crossword from the NYT. Small grid, quick clues — built to be speedrun.",
-      "winCheck": {
-        "query": "h1",
-        "text": "Congratulations!"
-      },
-      "loseCheck": null
-    },
-    {
       "slug": "strands",
       "name": "Strands",
       "url": "https://www.nytimes.com/games/strands",

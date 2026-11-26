@@ -80,21 +80,27 @@
 </script>
 
 {#if puzzleStore.activePuzzles.length === 0}
-  <div class="text-gray-500">First time here? Click the settings icon.</div>
+  <div class="text-zinc-500 dark:text-zinc-400">First time here? Click the settings icon.</div>
 {/if}
 <div
   class="flex flex-auto overflow-y-auto flex-col gap-2
 	[&::-webkit-scrollbar]:w-2
   [&::-webkit-scrollbar-track]:rounded-full
-  [&::-webkit-scrollbar-track]:bg-gray-100
+  [&::-webkit-scrollbar-track]:bg-zinc-100
   [&::-webkit-scrollbar-thumb]:rounded-full
-  [&::-webkit-scrollbar-thumb]:bg-gray-300
-  dark:[&::-webkit-scrollbar-track]:bg-neutral-700
-  dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
+  [&::-webkit-scrollbar-thumb]:bg-zinc-300
+  dark:[&::-webkit-scrollbar-track]:bg-zinc-800
+  dark:[&::-webkit-scrollbar-thumb]:bg-zinc-600"
 >
   {#each puzzleStore.activePuzzles as puzzle, index}
+    {@const isActive = currentPuzzle === index && timerRef?.getIsRunning()}
     <div
-      class="flex items-center gap-2 w-64 border border-gray-300 p-2 rounded"
+      class={[
+        'flex w-64 items-center gap-2 rounded-xl border p-2 transition-colors',
+        isActive
+          ? 'border-amber-400/70 bg-amber-400/5'
+          : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900/60'
+      ]}
       draggable={allowReorder}
       role="option"
       aria-selected={false}
@@ -106,8 +112,8 @@
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="w-5 h-5 {allowReorder
-          ? 'text-gray-400 cursor-move'
-          : 'text-gray-300'}"
+          ? 'text-zinc-400 cursor-move'
+          : 'text-zinc-300 dark:text-zinc-600'}"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -119,26 +125,27 @@
           d="M4 6h16M4 12h16M4 18h16"
         />
       </svg>
-      <img width="32" height="32" src={puzzle.icon} alt={puzzle.name} />
-      <button class="cursor-pointer" onclick={() => openPuzzle(puzzle.url)}
-        >{puzzle.name}</button
+      <img width="32" height="32" src={puzzle.icon} alt={puzzle.name} class="rounded-lg" />
+      <button
+        class="cursor-pointer font-medium hover:text-amber-600 dark:hover:text-amber-300"
+        onclick={() => openPuzzle(puzzle.url)}>{puzzle.name}</button
       >
       {#if currentPuzzle === index && timerRef?.getIsRunning() && !timerRef?.getIsPaused()}
         {#if generalSettingsStore.isShowGiveUp}
           <button
-            class="ml-auto p-2 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md cursor-pointer"
+            class="ml-auto cursor-pointer rounded-md bg-zinc-200 px-2 py-1 text-sm text-zinc-800 transition-colors hover:bg-zinc-300 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
             onclick={giveUpCB}>Give up</button
           >
         {:else}
-          <div class="ml-auto text-green-500">
+          <div class="ml-auto font-mono tabular-nums text-green-500">
             {timerRef.getFormattedTime()}
           </div>
         {/if}
       {:else}
         <div
-          class="ml-auto {splits[index] === 'DNF'
-            ? 'text-red-500'
-            : 'text-green-500'}"
+          class="ml-auto font-mono tabular-nums {splits[index] === 'DNF'
+            ? 'text-rose-500'
+            : 'text-emerald-600 dark:text-emerald-400'}"
         >
           {splits[index] ?? ''}
         </div>

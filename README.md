@@ -46,7 +46,7 @@ npm run format   # prettier
 public/             Static extension assets (manifest, content script, links.json)
   manifest.json     MV3 manifest; registers the content script per puzzle site
   content-script.js Win/lose detection, injected into puzzle tabs
-  links.json        Puzzle catalogue (URLs, icons, win/lose checks)
+  links.json        Puzzle catalogue (URLs, icons, categories, publishers, win/lose checks)
 src/
   App.svelte        Side panel: run state, tab management, pause/resume
   lib/component/    UI components (Timer, PuzzleList, Overlay, Share, ...)

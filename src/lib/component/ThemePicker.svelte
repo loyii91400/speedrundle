@@ -6,13 +6,13 @@
 
 <button
   onclick={toggleTheme}
-  class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+  class="p-2 rounded-full bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-colors"
   aria-label="Toggle theme"
 >
   {#if isDarkMode}
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      class="h-6 w-6 text-yellow-500"
+      class="h-6 w-6 text-amber-400"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -27,7 +27,7 @@
   {:else}
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      class="h-6 w-6 text-gray-800"
+      class="h-6 w-6 text-zinc-700"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"

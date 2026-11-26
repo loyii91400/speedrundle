@@ -28,7 +28,7 @@
 </script>
 
 <h2
-  class="text-3xl font-bold mb-6 text-center text-blue-700 dark:text-blue-300"
+  class="font-display mb-6 text-center text-3xl font-bold tracking-tight text-amber-600 dark:text-amber-400"
 >
   How to Play
 </h2>
@@ -36,24 +36,24 @@
 <div class="space-y-4">
   {#each steps as step}
     <div
-      class="flex items-center bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm hover:shadow-md transition-all"
+      class="flex items-center rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900/60"
     >
-      <div class="text-4xl mr-4 opacity-70">{step.icon}</div>
+      <div class="mr-4 text-4xl opacity-70">{step.icon}</div>
       <div>
-        <h3 class="font-semibold text-lg text-blue-600 dark:text-blue-300">
+        <h3 class="font-display text-lg font-semibold text-amber-600 dark:text-amber-300">
           {step.title}
         </h3>
-        <p class="text-gray-600 dark:text-gray-300">{step.description}</p>
+        <p class="text-zinc-600 dark:text-zinc-400">{step.description}</p>
       </div>
     </div>
   {/each}
 </div>
 
-<div class="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+<div class="mt-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
   <p>Enjoy solving puzzles and have fun!</p>
 </div>
 <div>
-  <div class="mt-2 text-center text-sm text-gray-500 dark:text-gray-400">
+  <div class="mt-2 text-center text-sm text-zinc-500 dark:text-zinc-400">
     <p>Want to support me?</p>
   </div>
   <div class="mt-2 flex justify-center">

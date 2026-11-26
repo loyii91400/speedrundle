@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Paused Page</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap"
+      rel="stylesheet"
+    />
     <style>
       body {
         margin: 0;
@@ -12,9 +18,9 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        font-family: Arial, sans-serif;
+        font-family: ui-sans-serif, system-ui, sans-serif;
         transition: background-color 0.5s ease;
-        background-color: #fff;
+        background-color: #fafafa; /* zinc-50 */
       }
 
       .content {
@@ -22,29 +28,30 @@
       }
 
       .paused-text {
+        font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
         font-size: 8rem;
         font-weight: bold;
         margin-bottom: 0.5rem;
         transition: color 0.5s ease;
-        color: #333;
+        color: #d97706; /* amber-600 */
       }
 
       .info-text {
         font-size: 1.5rem;
         transition: color 0.5s ease;
-        color: #555;
+        color: #71717a; /* zinc-500 */
       }
 
       body.dark {
-        background-color: oklch(21% 0.034 264.665);
+        background-color: #09090b; /* zinc-950 */
       }
 
       body.dark .paused-text {
-        color: #eee;
+        color: #fbbf24; /* amber-400 */
       }
 
       body.dark .info-text {
-        color: #bbb;
+        color: #a1a1aa; /* zinc-400 */
       }
 
       @media (max-width: 768px) {

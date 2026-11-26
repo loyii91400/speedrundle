@@ -36,7 +36,8 @@ After editing the catalogue, run:
 npm run sync:links
 ```
 
-This regenerates `../public/links.json` (what the extension loads) and updates the
+This regenerates `../public/links.json` (what the extension loads — including `category` and
+`publisher`, which power the extension's settings search/filter) and updates the
 content-script `matches` in `../public/manifest.json` (so win/lose detection runs on every
 game's site). Every game on this site is therefore guaranteed to be playable in the
 extension.

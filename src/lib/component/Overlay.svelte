@@ -39,10 +39,10 @@
     <div
       role="dialog"
       aria-modal="true"
-      class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg shadow-lg p-8 relative min-w-[300px] w-[90%] max-h-[80vh] overflow-y-auto"
+      class="relative max-h-[80vh] min-w-[300px] w-[90%] overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-8 text-zinc-900 shadow-lg dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
     >
       <button
-        class="absolute top-2 right-2 text-gray-500 hover:text-black dark:hover:text-white text-2xl leading-none p-2 transition-colors"
+        class="absolute top-2 right-2 p-2 text-2xl leading-none text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-zinc-100"
         onclick={onClose}
         aria-label="Close"
       >

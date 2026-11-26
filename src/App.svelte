@@ -212,7 +212,7 @@
 </script>
 
 <div
-  class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300"
+  class="min-h-screen bg-zinc-50 text-zinc-900 transition-colors duration-300 dark:bg-zinc-950 dark:text-zinc-100"
 >
   <div class="fixed top-4 right-2">
     <div class="flex flex-col gap-2">
@@ -220,7 +220,7 @@
 
       <button
         onclick={() => (isSettingsOverlayOpen = true)}
-        class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+        class="p-2 rounded-full bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-colors"
         aria-label="Open settings"
       >
         <svg
@@ -229,7 +229,7 @@
           viewBox="0 0 24 24"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
-          class="text-gray-900 dark:text-white"
+          class="text-zinc-700 dark:text-zinc-200"
         >
           <path
             stroke="currentColor"
@@ -248,7 +248,7 @@
 
       <button
         onclick={() => (isHowToPlayOverlayOpen = true)}
-        class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+        class="p-2 rounded-full bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 transition-colors"
         aria-label="How to play"
       >
         <svg
@@ -257,7 +257,7 @@
           viewBox="0 0 15 15"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          class="text-gray-900 dark:text-white"
+          class="text-zinc-700 dark:text-zinc-200"
         >
           <path
             fill-rule="evenodd"
@@ -270,24 +270,30 @@
     </div>
   </div>
   <div class="flex flex-col gap-4 py-32 h-screen items-center">
-    <div class="text-4xl font-bold text-gray-800 dark:text-gray-100">
+    <div
+      class="flex items-center gap-3 font-display text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100"
+    >
+      <span
+        class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-400 text-2xl text-zinc-950"
+        aria-hidden="true">⏱</span
+      >
       Speedrundle
     </div>
     <Timer bind:this={timerRef} />
     <div class="flex gap-4">
       {#if timerRef?.getIsRunning()}
         <button
-          class="w-24 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md"
+          class="w-24 h-10 cursor-pointer rounded-lg bg-amber-400 font-semibold text-zinc-950 transition-colors hover:bg-amber-300"
           onclick={manualSplit}>Split</button
         >
       {:else}
         <button
-          class="w-24 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md"
+          class="w-24 h-10 cursor-pointer rounded-lg bg-amber-400 font-semibold text-zinc-950 transition-colors hover:bg-amber-300"
           onclick={start}>Start</button
         >
       {/if}
       <button
-        class="w-24 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md"
+        class="w-24 h-10 cursor-pointer rounded-lg bg-zinc-200 font-semibold text-zinc-800 transition-colors hover:bg-zinc-300 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
         onclick={reset}>Reset</button
       >
     </div>
@@ -295,12 +301,12 @@
       {#if generalSettingsStore.isAllowPause && timerRef?.getIsRunning()}
         {#if !timerRef?.getIsPaused()}
           <button
-            class="w-24 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md"
+            class="w-24 h-10 cursor-pointer rounded-lg bg-zinc-200 font-semibold text-zinc-800 transition-colors hover:bg-zinc-300 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
             onclick={pause}>Pause</button
           >
         {:else}
           <button
-            class="w-24 h-10 bg-gray-200 cursor-pointer dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-100 rounded-md"
+            class="w-24 h-10 cursor-pointer rounded-lg bg-zinc-200 font-semibold text-zinc-800 transition-colors hover:bg-zinc-300 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
             onclick={resume}>Resume</button
           >
         {/if}
@@ -314,7 +320,9 @@
       allowReorder={!timerRef?.getIsRunning()}
     />
     {#if finishTime != null}
-      <button class="cursor-pointer" onclick={() => (isShareOverlayOpen = true)}
+      <button
+        class="cursor-pointer font-semibold text-amber-600 transition-colors hover:text-amber-500 dark:text-amber-400 dark:hover:text-amber-300"
+        onclick={() => (isShareOverlayOpen = true)}
         >Share your score</button
       >
     {/if}

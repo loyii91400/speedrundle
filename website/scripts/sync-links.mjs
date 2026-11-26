@@ -3,7 +3,8 @@
  *
  * `src/lib/data/games.json` is the single source of truth. This script:
  *   1. Writes `public/links.json` (what the extension side panel loads), stripping
- *      website-only fields (slug, category, publisher, description).
+ *      website-only fields (slug, description). Category and publisher are kept —
+ *      the extension's puzzle settings use them for search and filtering.
  *   2. Updates the content-script `matches` in `public/manifest.json` so the
  *      win/lose detection script is injected on every game's site.
  *
@@ -29,11 +30,14 @@ const catalogue = JSON.parse(
   readFileSync(fileURLToPath(new URL('../src/lib/data/games.json', import.meta.url)), 'utf8')
 );
 
-// 1. Extension puzzle catalogue: the extension contract fields only.
+// 1. Extension puzzle catalogue: the extension contract fields plus
+// category/publisher, which power the extension's settings search/filter.
 const links = catalogue.games.map((game) => ({
   name: game.name,
   url: game.url,
   icon: game.icon,
+  category: game.category,
+  publisher: game.publisher,
   winCheck: game.winCheck,
   loseCheck: game.loseCheck
 }));
