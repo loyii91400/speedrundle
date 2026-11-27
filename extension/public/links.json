@@ -101,6 +101,46 @@
     "scoreButton": null
   },
   {
+    "name": "Squaredle Express",
+    "url": "https://squaredle.app/?level=xp",
+    "icon": "https://squaredle.app/icons/icon-512.png",
+    "category": "Words",
+    "publisher": "Squaredle",
+    "winCheck": {
+      "query": "#board .board.celebrate",
+      "text": ""
+    },
+    "loseCheck": null,
+    "scoreButton": {
+      "query": "#shareContentCopyBtn, #shareContentShareBtn",
+      "text": ["Copy", "Share"]
+    }
+  },
+  {
+    "name": "Verticle",
+    "url": "https://verticle.netlify.app/",
+    "icon": "https://verticle.netlify.app/logo192.png",
+    "category": "Words",
+    "publisher": "Verticle",
+    "winCheck": {
+      "type": "storage",
+      "key": "gameStats",
+      "path": "currentStreak",
+      "increases": true
+    },
+    "loseCheck": {
+      "type": "storage",
+      "key": "gameStats",
+      "path": "gamesFailed",
+      "increases": true
+    },
+    "scoreButton": {
+      "query": "button",
+      "text": "Share",
+      "attempts": 50
+    }
+  },
+  {
     "name": "Wiki Game Daily",
     "url": "https://www.thewikigamedaily.com",
     "icon": "https://www.thewikigamedaily.com/favicon.png",

@@ -336,10 +336,10 @@ function findScoreButton(check) {
 }
 
 // Result dialogs can render shortly after a storage-based win is visible.
-// Retry briefly, then click the configured Share control once. The MAIN-world
-// hook captures attempted clipboard writes even if browser permission denies
-// the actual background write.
-function captureScore(check, attemptsRemaining = 20) {
+// Retry briefly, with a per-game override for slower dialogs, then click the
+// configured Share control once. The MAIN-world hook captures attempted
+// clipboard writes even if browser permission denies the actual background write.
+function captureScore(check, attemptsRemaining = check?.attempts ?? 20) {
   if (!check || typeof window === 'undefined') return;
   window.dispatchEvent(new CustomEvent('speedrundle:capture-result'));
   const button = findScoreButton(check);

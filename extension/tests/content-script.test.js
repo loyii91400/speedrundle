@@ -20,6 +20,7 @@ function createHarness(initialStorage = {}) {
 
   const messages = [];
   const dispatchedEvents = [];
+  const timeouts = [];
   const windowListeners = {};
   const document = { querySelectorAll: () => [] };
   const window = {
@@ -66,7 +67,10 @@ function createHarness(initialStorage = {}) {
     },
     setInterval: () => 1,
     clearInterval() {},
-    setTimeout: () => 1,
+    setTimeout: (callback) => {
+      timeouts.push(callback);
+      return timeouts.length;
+    },
     clearTimeout() {},
   });
   vm.runInContext(
@@ -79,6 +83,12 @@ function createHarness(initialStorage = {}) {
     messages,
     document,
     dispatchedEvents,
+    pendingTimeouts() {
+      return timeouts.length;
+    },
+    runNextTimeout() {
+      timeouts.shift()?.();
+    },
     set(key, value) {
       localStorage[key] = JSON.stringify(value);
     },
@@ -373,6 +383,44 @@ test('completion clicks the configured Share control', () => {
       (event) => event.type === 'speedrundle:capture-result'
     )
   );
+});
+
+test('Share capture stops after the configured retry limit', () => {
+  const harness = createHarness();
+  let clicks = 0;
+  const shareButton = {
+    innerText: 'Share',
+    textContent: 'Share',
+    checkVisibility: () => false,
+    getAttribute: () => null,
+    click() {
+      clicks++;
+    },
+  };
+  harness.document.querySelectorAll = (query) =>
+    query === 'button' ? [shareButton] : [];
+  harness.api.arm(
+    {
+      name: 'Test puzzle',
+      url: 'https://www.nytimes.com/games/wordle/index.html',
+      winCheck: wordleWin,
+      loseCheck: null,
+      scoreButton: { query: 'button', text: 'Share', attempts: 2 },
+    },
+    'test'
+  );
+  harness.set(wordleKey, {
+    states: { today: { data: { status: 'WIN' } } },
+  });
+
+  harness.api.scan(null);
+  assert.equal(harness.pendingTimeouts(), 1);
+  harness.runNextTimeout();
+  assert.equal(harness.pendingTimeouts(), 1);
+  harness.runNextTimeout();
+
+  assert.equal(harness.pendingTimeouts(), 0);
+  assert.equal(clicks, 0);
 });
 
 test('Share text is sent with the configured game identity', () => {

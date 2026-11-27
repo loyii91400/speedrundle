@@ -113,6 +113,50 @@
       "scoreButton": null
     },
     {
+      "slug": "squaredle-express",
+      "name": "Squaredle Express",
+      "url": "https://squaredle.app/?level=xp",
+      "icon": "https://squaredle.app/icons/icon-512.png",
+      "category": "Words",
+      "publisher": "Squaredle",
+      "description": "Find every word in a compact 3×3 grid by connecting letters in any direction. A fresh Express puzzle every day.",
+      "winCheck": {
+        "query": "#board .board.celebrate",
+        "text": ""
+      },
+      "loseCheck": null,
+      "scoreButton": {
+        "query": "#shareContentCopyBtn, #shareContentShareBtn",
+        "text": ["Copy", "Share"]
+      }
+    },
+    {
+      "slug": "verticle",
+      "name": "Verticle",
+      "url": "https://verticle.netlify.app/",
+      "icon": "https://verticle.netlify.app/logo192.png",
+      "category": "Words",
+      "publisher": "Verticle",
+      "description": "A Wordle variant where the first five guesses are vertical, giving color hints for each column. Solve the daily word in six tries.",
+      "winCheck": {
+        "type": "storage",
+        "key": "gameStats",
+        "path": "currentStreak",
+        "increases": true
+      },
+      "loseCheck": {
+        "type": "storage",
+        "key": "gameStats",
+        "path": "gamesFailed",
+        "increases": true
+      },
+      "scoreButton": {
+        "query": "button",
+        "text": "Share",
+        "attempts": 50
+      }
+    },
+    {
       "slug": "wiki-game-daily",
       "name": "Wiki Game Daily",
       "url": "https://www.thewikigamedaily.com",
