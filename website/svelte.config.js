@@ -6,7 +6,10 @@ const config = {
   preprocess: vitePreprocess(),
   kit: {
     // Fully static site: every route is prerendered at build time.
-    adapter: adapter()
+    adapter: adapter(),
+    paths: {
+      base: process.env.BASE_PATH || ''
+    }
   }
 };
 

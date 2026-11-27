@@ -1,4 +1,5 @@
 <script>
+  import { base } from '$app/paths';
   import { CHROME_STORE_URL, FIREFOX_STORE_URL, REPO_URL } from '$lib/games.js';
 
   const setupSteps = [
@@ -159,7 +160,7 @@
     <h2 class="font-display text-lg font-semibold tracking-tight">Ready to race?</h2>
     <p class="mt-1 text-sm text-zinc-400">Browse the catalogue and pick the games for your run.</p>
     <a
-      href="/"
+      href="{base}/"
       class="mt-4 inline-block rounded-lg bg-amber-400 px-5 py-2.5 font-semibold text-zinc-950 transition-colors hover:bg-amber-300"
     >
       Browse games

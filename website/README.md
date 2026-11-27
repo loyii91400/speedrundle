@@ -49,5 +49,13 @@ content-script `matches` in `../extension/chrome/manifest.json` and
 
 ## Deployment
 
-`npm run build` emits a plain static site into `build/` — host it anywhere (GitHub Pages,
-Netlify, Cloudflare Pages, …).
+The [Deploy website workflow](../.github/workflows/deploy-website.yml) builds and publishes the
+site to GitHub Pages after every push to `main`. You can also run it manually from the Actions
+tab.
+
+To enable deployment, open the repository's **Settings → Pages** and select **GitHub Actions**
+under **Build and deployment → Source**. The workflow supplies the correct base path for project
+Pages sites and custom domains automatically.
+
+For other static hosts, run `npm run build` and publish the `build/` directory. Set `BASE_PATH`
+during the build if the site will be served from a subpath.

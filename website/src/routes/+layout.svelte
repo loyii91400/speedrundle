@@ -1,4 +1,5 @@
 <script>
+  import { base } from '$app/paths';
   import '../app.css';
   import { REPO_URL } from '$lib/games.js';
 
@@ -8,7 +9,10 @@
 <div class="flex min-h-screen flex-col">
   <header class="border-b border-zinc-800/80">
     <nav class="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-4 sm:px-6">
-      <a href="/" class="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight">
+      <a
+        href="{base}/"
+        class="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight"
+      >
         <span
           class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-400 text-base text-zinc-950"
           aria-hidden="true">⏱</span
@@ -16,8 +20,10 @@
         Daily Games Speedrun
       </a>
       <div class="flex items-center gap-1 text-sm font-medium text-zinc-400">
-        <a href="/" class="rounded-md px-3 py-2 transition-colors hover:text-zinc-100">Games</a>
-        <a href="/install" class="rounded-md px-3 py-2 transition-colors hover:text-zinc-100">
+        <a href="{base}/" class="rounded-md px-3 py-2 transition-colors hover:text-zinc-100"
+          >Games</a
+        >
+        <a href="{base}/install" class="rounded-md px-3 py-2 transition-colors hover:text-zinc-100">
           Install
         </a>
         <a
@@ -63,7 +69,9 @@
         </p>
       </div>
       <div class="flex items-center gap-4">
-        <a href="/install" class="transition-colors hover:text-zinc-300">Install the extension</a>
+        <a href="{base}/install" class="transition-colors hover:text-zinc-300"
+          >Install the extension</a
+        >
         <a
           href={REPO_URL}
           class="transition-colors hover:text-zinc-300"
