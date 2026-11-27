@@ -98,6 +98,21 @@
       }
     },
     {
+      "slug": "wapo-daily-word-search",
+      "name": "Daily Word Search",
+      "url": "https://games.washingtonpost.com/games/daily-word-search",
+      "icon": "https://arenacloud.cdn.arkadiumhosted.com/arenaxstorage-blob/arenax-games/WordSearch/0.46/assets/thumbs/icon_192.png",
+      "category": "Words",
+      "publisher": "The Washington Post",
+      "description": "Find every hidden word in a fresh daily grid and race to clear the puzzle as quickly as possible.",
+      "winCheck": {
+        "query": "[data-element-description='game-end play-again-button']",
+        "text": "Play Again"
+      },
+      "loseCheck": null,
+      "scoreButton": null
+    },
+    {
       "slug": "wiki-game-daily",
       "name": "Wiki Game Daily",
       "url": "https://www.thewikigamedaily.com",

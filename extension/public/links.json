@@ -88,6 +88,19 @@
     }
   },
   {
+    "name": "Daily Word Search",
+    "url": "https://games.washingtonpost.com/games/daily-word-search",
+    "icon": "https://arenacloud.cdn.arkadiumhosted.com/arenaxstorage-blob/arenax-games/WordSearch/0.46/assets/thumbs/icon_192.png",
+    "category": "Words",
+    "publisher": "The Washington Post",
+    "winCheck": {
+      "query": "[data-element-description='game-end play-again-button']",
+      "text": "Play Again"
+    },
+    "loseCheck": null,
+    "scoreButton": null
+  },
+  {
     "name": "Wiki Game Daily",
     "url": "https://www.thewikigamedaily.com",
     "icon": "https://www.thewikigamedaily.com/favicon.png",
