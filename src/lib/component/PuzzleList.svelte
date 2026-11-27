@@ -16,6 +16,32 @@
 
   /** @type {number | null} */
   let draggedPuzzle = null;
+  /** @type {number | null} */
+  let copiedPuzzleIndex = $state(null);
+  /** @type {number | null} */
+  let copyFailedPuzzleIndex = $state(null);
+  /** @type {ReturnType<typeof setTimeout> | null} */
+  let copyFeedbackTimer = null;
+
+  /** @param {number} index */
+  async function copyResult(index) {
+    const resultText = gameScores[index];
+    if (!resultText) return;
+    if (copyFeedbackTimer) clearTimeout(copyFeedbackTimer);
+    try {
+      await navigator.clipboard.writeText(resultText);
+      copiedPuzzleIndex = index;
+      copyFailedPuzzleIndex = null;
+    } catch (error) {
+      console.error('Failed to copy saved game result:', error);
+      copiedPuzzleIndex = null;
+      copyFailedPuzzleIndex = index;
+    }
+    copyFeedbackTimer = setTimeout(() => {
+      copiedPuzzleIndex = null;
+      copyFailedPuzzleIndex = null;
+    }, 2000);
+  }
 
   /**
    * @param {number} index
@@ -154,9 +180,30 @@
       {:else}
         <div class="ml-auto flex items-start gap-2">
           {#if resultText}
-            <pre
-              class="m-0 max-h-32 max-w-36 overflow-auto font-mono text-[10px] leading-tight whitespace-pre-wrap text-zinc-600 dark:text-zinc-300"
-              aria-label="Copied {puzzle.name} result">{resultText}</pre>
+            <div class="max-w-36">
+              <button
+                type="button"
+                class="block max-h-32 max-w-36 cursor-copy overflow-auto text-left font-mono text-[10px] leading-tight whitespace-pre-wrap text-zinc-600 dark:text-zinc-300"
+                onclick={() => copyResult(index)}
+                aria-label={`Copy ${puzzle.name} result`}
+                title={`Copy ${puzzle.name} result`}>{resultText}</button
+              >
+              {#if copiedPuzzleIndex === index}
+                <span
+                  class="mt-0.5 block text-[10px] text-emerald-600 dark:text-emerald-400"
+                  aria-live="polite">Copied!</span
+                >
+              {:else if copyFailedPuzzleIndex === index}
+                <span
+                  class="mt-0.5 block text-[10px] text-rose-500"
+                  aria-live="polite">Copy failed</span
+                >
+              {:else}
+                <span class="mt-0.5 block text-[10px] text-zinc-400"
+                  >Click to copy</span
+                >
+              {/if}
+            </div>
           {/if}
           <div
             class="shrink-0 font-mono tabular-nums {splits[index] === 'DNF'
