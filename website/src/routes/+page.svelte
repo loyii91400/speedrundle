@@ -76,7 +76,7 @@
       rel="noopener noreferrer"
       class="rounded-lg bg-amber-400 px-5 py-2.5 font-semibold text-zinc-950 transition-colors hover:bg-amber-300"
     >
-      Add to Chrome
+      Install Extension
     </a>
     <a
       href="#games"
