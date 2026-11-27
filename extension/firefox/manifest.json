@@ -27,11 +27,7 @@
       }
     }
   },
-  "permissions": [
-    "storage",
-    "scripting",
-    "activeTab"
-  ],
+  "permissions": ["storage"],
   "content_scripts": [
     {
       "matches": [

@@ -15,12 +15,7 @@
   "side_panel": {
     "default_path": "index.html"
   },
-  "permissions": [
-    "sidePanel",
-    "storage",
-    "scripting",
-    "activeTab"
-  ],
+  "permissions": ["sidePanel", "storage"],
   "content_scripts": [
     {
       "matches": [
