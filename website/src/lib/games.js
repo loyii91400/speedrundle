@@ -35,8 +35,12 @@ import catalogue from '$lib/data/games.json';
 export const REPO_URL = 'https://github.com/loyii91400/speedrundle';
 
 /** Chrome Web Store listing for the extension. */
-export const STORE_URL =
+export const CHROME_STORE_URL =
   'https://chromewebstore.google.com/detail/dbfenbaoamakbdffgddofjmfeblfjohl';
+
+/** Firefox Add-ons listing for the extension. */
+export const FIREFOX_STORE_URL =
+  'https://addons.mozilla.org/en-US/firefox/addon/daily-games-speedrun/';
 
 /** All games in the catalogue. @type {Game[]} */
 export const games = catalogue.games;

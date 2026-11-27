@@ -2,7 +2,7 @@
 
 Speedrun your daily puzzle games. Daily Games Speedrun is a browser extension (Manifest V3) that strings your daily puzzles — Wordle, the NYT Mini, Strands, Connections, and more — into a single timed run, with automatic splits when each game detects your win (or loss).
 
-Install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/dbfenbaoamakbdffgddofjmfeblfjohl), or build the Chrome or Firefox version from source (below).
+Install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/dbfenbaoamakbdffgddofjmfeblfjohl) or [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/daily-games-speedrun/), or build either version from source (below).
 
 ## How it works
 

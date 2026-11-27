@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import GameCard from '$lib/components/GameCard.svelte';
   import GameRow from '$lib/components/GameRow.svelte';
-  import { categoryStyle, STORE_URL } from '$lib/games.js';
+  import { categoryStyle, CHROME_STORE_URL } from '$lib/games.js';
 
   let { data } = $props();
 
@@ -71,7 +71,7 @@
   </h1>
   <div class="mt-6 flex items-center justify-center gap-3">
     <a
-      href={STORE_URL}
+      href={CHROME_STORE_URL}
       target="_blank"
       rel="noopener noreferrer"
       class="rounded-lg bg-amber-400 px-5 py-2.5 font-semibold text-zinc-950 transition-colors hover:bg-amber-300"

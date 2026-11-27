@@ -1,5 +1,5 @@
 <script>
-  import { REPO_URL, STORE_URL } from '$lib/games.js';
+  import { CHROME_STORE_URL, FIREFOX_STORE_URL, REPO_URL } from '$lib/games.js';
 
   const setupSteps = [
     {
@@ -62,12 +62,12 @@
   <h1 class="font-display text-4xl font-bold tracking-tight">Install Daily Games Speedrun</h1>
   <p class="mt-4 text-zinc-400">
     Daily Games Speedrun is a free browser extension that strings your daily puzzles into one timed
-    run. Install it from the Chrome Web Store, or build it from source for Chrome or Firefox.
+    run. Install it from the Chrome Web Store or Firefox Add-ons, or build it from source.
   </p>
 
   <div class="mt-6 flex flex-wrap gap-3">
     <a
-      href={STORE_URL}
+      href={CHROME_STORE_URL}
       target="_blank"
       rel="noopener noreferrer"
       class="inline-flex items-center gap-2 rounded-lg bg-amber-400 px-6 py-3 text-lg font-semibold text-zinc-950 transition-colors hover:bg-amber-300"
@@ -75,15 +75,17 @@
       Add to Chrome ↗
     </a>
     <a
-      href="#firefox"
+      href={FIREFOX_STORE_URL}
+      target="_blank"
+      rel="noopener noreferrer"
       class="inline-flex items-center gap-2 rounded-lg border border-zinc-700 px-6 py-3 text-lg font-semibold text-zinc-200 transition-colors hover:border-zinc-500"
     >
-      Firefox instructions ↓
+      Add to Firefox ↗
     </a>
   </div>
   <p class="mt-3 text-sm text-zinc-500">
-    Once installed from the Chrome Web Store, click the Daily Games Speedrun toolbar icon to open
-    the side panel and start your first run.
+    Once installed, click the Daily Games Speedrun toolbar icon to open the side panel (Chrome) or
+    sidebar (Firefox) and start your first run.
   </p>
 
   <div class="mt-14 border-t border-zinc-800 pt-8">
