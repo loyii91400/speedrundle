@@ -77,6 +77,27 @@
       }
     },
     {
+      "slug": "mini-crossword",
+      "name": "Mini Crossword",
+      "url": "https://minicrossword.com/",
+      "icon": "https://minicrossword.com/favicon-mini-crossword.svg",
+      "category": "Words",
+      "publisher": "Hey, Good Game",
+      "description": "Solve a compact daily crossword edited by Jeff Chen. Most puzzles are 5×5, with larger grids on weekends.",
+      "winCheck": {
+        "type": "storage",
+        "key": "crosswordMini_daily_daily-easy",
+        "idPath": "puzzleId",
+        "path": "isComplete",
+        "equals": true
+      },
+      "loseCheck": null,
+      "scoreButton": {
+        "query": "button, [role='button']",
+        "text": "Share"
+      }
+    },
+    {
       "slug": "wiki-game-daily",
       "name": "Wiki Game Daily",
       "url": "https://www.thewikigamedaily.com",
@@ -185,6 +206,26 @@
           "Copy results",
           "Copy score"
         ]
+      }
+    },
+    {
+      "slug": "patch-guesser",
+      "name": "Patch Guesser",
+      "url": "https://patchguesser.site/",
+      "icon": "https://patchguesser.site/_a/icon.914b65ad77.svg",
+      "category": "Music",
+      "publisher": "Patch Guesser",
+      "description": "Recreate a hidden synthesizer patch by ear in six tries, using color-coded feedback to dial in each setting.",
+      "winCheck": {
+        "query": "#pg-banner-title",
+        "text": "Patch Rebuilt"
+      },
+      "loseCheck": {
+        "query": "#pg-banner-title",
+        "text": "Target Patch Revealed"
+      },
+      "scoreButton": {
+        "query": "#pg-share"
       }
     }
   ]

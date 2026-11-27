@@ -69,6 +69,25 @@
     }
   },
   {
+    "name": "Mini Crossword",
+    "url": "https://minicrossword.com/",
+    "icon": "https://minicrossword.com/favicon-mini-crossword.svg",
+    "category": "Words",
+    "publisher": "Hey, Good Game",
+    "winCheck": {
+      "type": "storage",
+      "key": "crosswordMini_daily_daily-easy",
+      "idPath": "puzzleId",
+      "path": "isComplete",
+      "equals": true
+    },
+    "loseCheck": null,
+    "scoreButton": {
+      "query": "button, [role='button']",
+      "text": "Share"
+    }
+  },
+  {
     "name": "Wiki Game Daily",
     "url": "https://www.thewikigamedaily.com",
     "icon": "https://www.thewikigamedaily.com/favicon.png",
@@ -169,6 +188,24 @@
         "Copy results",
         "Copy score"
       ]
+    }
+  },
+  {
+    "name": "Patch Guesser",
+    "url": "https://patchguesser.site/",
+    "icon": "https://patchguesser.site/_a/icon.914b65ad77.svg",
+    "category": "Music",
+    "publisher": "Patch Guesser",
+    "winCheck": {
+      "query": "#pg-banner-title",
+      "text": "Patch Rebuilt"
+    },
+    "loseCheck": {
+      "query": "#pg-banner-title",
+      "text": "Target Patch Revealed"
+    },
+    "scoreButton": {
+      "query": "#pg-share"
     }
   }
 ]
