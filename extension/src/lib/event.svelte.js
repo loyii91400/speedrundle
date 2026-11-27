@@ -1,5 +1,5 @@
 import puzzlesStore from './store/puzzles.svelte.js';
-import nextPuzzleStore from './store/nextPuzzle.svelte';
+import nextPuzzleStore from './store/nextPuzzle.svelte.js';
 import currentRunStore from './store/currentRun.svelte.js';
 
 try {

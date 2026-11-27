@@ -42,10 +42,10 @@ After editing the catalogue, run:
 npm run sync:links
 ```
 
-This regenerates `../public/links.json` (what the extension loads — including `category` and
+This regenerates `../extension/public/links.json` (what the extension loads — including `category` and
 `publisher`, which power the extension's settings search/filter) and updates the
-content-script `matches` in `../public/manifest.json` (so win/lose detection runs on every
-game's site).
+content-script `matches` in `../extension/chrome/manifest.json` and
+`../extension/firefox/manifest.json` (so win/lose detection runs on every game's site).
 
 ## Deployment
 

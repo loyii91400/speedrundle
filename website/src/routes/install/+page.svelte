@@ -9,13 +9,13 @@
     },
     {
       title: 'Install dependencies and build',
-      code: 'cd speedrundle\nnpm install\nnpm run build',
-      note: 'The build outputs the unpacked extension into the extension/ directory.'
+      code: 'cd speedrundle/extension\nnpm install\nnpm run build',
+      note: 'The build outputs the unpacked Chrome extension into extension/dist/chrome/ and a ZIP archive at extension/dist/speedrundle-chrome.zip.'
     },
     {
       title: 'Load it in Chrome',
       code: null,
-      note: 'Go to chrome://extensions, enable Developer mode, click "Load unpacked" and select the extension/ directory.'
+      note: 'Go to chrome://extensions, enable Developer mode, click "Load unpacked" and select the extension/dist/chrome/ directory.'
     },
     {
       title: 'Start your first run',
