@@ -61,6 +61,23 @@ Each ZIP contains `manifest.json` at its root, ready for browser-store upload. Y
 2. Click **Load Temporary Add-on** and select `extension/dist/firefox/manifest.json`.
 3. Click the Daily Games Speedrun toolbar icon to open the sidebar.
 
+## Firefox source-code submission
+
+See [SOURCE_SUBMISSION.md](SOURCE_SUBMISSION.md) for the exact build environment, Node.js and npm
+installation steps, reproducible Firefox build instructions, and source-package contents.
+
+To create the source-code ZIP required for addons.mozilla.org, run:
+
+```sh
+cd extension
+npm ci
+npm run package:source
+```
+
+This creates `extension/dist/daily-games-speedrun-source-v<version>.zip`. The archive contains the
+original source and lockfiles, excluding dependencies, build outputs, local environment files, and
+existing archives. Upload this source archive separately from the built Firefox add-on ZIP.
+
 ## Other scripts
 
 Run these from `extension/`:
