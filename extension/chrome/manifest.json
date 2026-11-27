@@ -28,7 +28,8 @@
         "https://bandle.app/*",
         "https://towerofquestions.com/*",
         "https://krillion.io/*",
-        "https://patchguesser.site/*"
+        "https://patchguesser.site/*",
+        "https://xordle.org/*"
       ],
       "js": [
         "content-script.js"
@@ -46,7 +47,8 @@
         "https://bandle.app/*",
         "https://towerofquestions.com/*",
         "https://krillion.io/*",
-        "https://patchguesser.site/*"
+        "https://patchguesser.site/*",
+        "https://xordle.org/*"
       ],
       "js": [
         "clipboard-listener.js"

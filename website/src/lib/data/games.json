@@ -286,6 +286,29 @@
       "scoreButton": {
         "query": "#pg-share"
       }
+    },
+    {
+      "slug": "xordle",
+      "name": "Xordle",
+      "url": "https://xordle.org/",
+      "icon": "https://xordle.org/favicon.png",
+      "category": "Words",
+      "publisher": "Xordle",
+      "description": "Solve two hidden words at once. Each guess combines their color clues with XOR, revealing what matches exactly one of the answers.",
+      "winCheck": {
+        "type": "storage",
+        "keyPrefix": "result-",
+        "equals": 1
+      },
+      "loseCheck": {
+        "type": "storage",
+        "keyPrefix": "result-",
+        "equals": 2
+      },
+      "scoreButton": {
+        "query": "button, [role='button']",
+        "text": "Share"
+      }
     }
   ]
 }
