@@ -7,7 +7,7 @@
   let copied = $state(false);
 
   async function copyToClipboard() {
-    const text = `OMG I JUST FINISHED SPEEDRUNDLE IN ${finishTime}\n\n${puzzles.map((puzzle, index) => `${puzzle.name}: ${splits[index] ?? ''}`).join('\n')}`;
+    const text = `OMG I JUST FINISHED DAILY GAMES SPEEDRUN IN ${finishTime}\n\n${puzzles.map((puzzle, index) => `${puzzle.name}: ${splits[index] ?? ''}`).join('\n')}`;
     try {
       await navigator.clipboard.writeText(text);
       copied = true;
@@ -19,7 +19,7 @@
 </script>
 
 <div class="flex flex-col gap-2 items-center">
-  OMG I JUST FINISHED SPEEDRUNDLE IN {finishTime}
+  OMG I JUST FINISHED DAILY GAMES SPEEDRUN IN {finishTime}
   <div class="flex flex-col gap-2">
     {#each puzzles as puzzle, index}
       <div class="flex gap-2">

@@ -1,6 +1,6 @@
-# Speedrundle Website
+# Daily Games Speedrun Website
 
-Static catalogue of every daily game playable in the [Speedrundle](../README.md) browser
+Static catalogue of every daily game playable in the [Daily Games Speedrun](../README.md) browser
 extension — with search, category filtering, per-game detail pages, and extension install
 instructions.
 

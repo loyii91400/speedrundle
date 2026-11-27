@@ -306,7 +306,7 @@
         class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-400 text-2xl text-zinc-950"
         aria-hidden="true">⏱</span
       >
-      Speedrundle
+      Daily Games Speedrun
     </div>
     <Timer bind:this={timerRef} />
     <div class="flex gap-4">

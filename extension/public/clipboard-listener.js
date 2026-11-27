@@ -3,8 +3,8 @@
 // a manual Share/Copy interaction also enables a short capture window.
 
 (() => {
-  const RESULT_EVENT = 'speedrundle:game-result';
-  const CAPTURE_EVENT = 'speedrundle:capture-result';
+  const RESULT_EVENT = 'daily-games-speedrun:game-result';
+  const CAPTURE_EVENT = 'daily-games-speedrun:capture-result';
   const SHARE_WINDOW_MS = 2000;
   const AUTOMATIC_WINDOW_MS = 5000;
   let shareInteractionAt = 0;
@@ -89,7 +89,10 @@
       });
     }
   } catch (error) {
-    console.warn('[Speedrundle] Could not observe clipboard writes:', error);
+    console.warn(
+      '[Daily Games Speedrun] Could not observe clipboard writes:',
+      error
+    );
   }
 
   try {
@@ -110,7 +113,10 @@
       });
     }
   } catch (error) {
-    console.warn('[Speedrundle] Could not observe native shares:', error);
+    console.warn(
+      '[Daily Games Speedrun] Could not observe native shares:',
+      error
+    );
   }
 
   try {
@@ -126,7 +132,10 @@
       });
     }
   } catch (error) {
-    console.warn('[Speedrundle] Could not observe legacy copies:', error);
+    console.warn(
+      '[Daily Games Speedrun] Could not observe legacy copies:',
+      error
+    );
   }
 
   // Also observe an actual copy event for browsers that allow the legacy write.

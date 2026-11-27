@@ -14,14 +14,15 @@
 
   // Restore the saved view preference after hydration (not available during prerender).
   onMount(() => {
-    const saved = localStorage.getItem('speedrundle:view');
+    const saved =
+      localStorage.getItem('daily-games-speedrun:view') ?? localStorage.getItem('speedrundle:view');
     if (saved === 'grid' || saved === 'compact') view = saved;
   });
 
   /** @param {'grid' | 'compact'} mode */
   function setView(mode) {
     view = mode;
-    localStorage.setItem('speedrundle:view', mode);
+    localStorage.setItem('daily-games-speedrun:view', mode);
   }
 
   const filters = $derived([...new Set(['All', ...data.categories])]);
@@ -58,7 +59,7 @@
 </script>
 
 <svelte:head>
-  <title>Speedrundle — Daily Game Catalogue</title>
+  <title>Daily Games Speedrun — Daily Game Catalogue</title>
 </svelte:head>
 
 <section class="mb-10 text-center">

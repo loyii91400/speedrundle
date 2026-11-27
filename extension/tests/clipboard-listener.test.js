@@ -43,7 +43,8 @@ function createHarness() {
       windowListeners[type] = listener;
     },
     dispatchEvent(event) {
-      if (event.type === 'speedrundle:game-result') results.push(event);
+      if (event.type === 'daily-games-speedrun:game-result')
+        results.push(event);
       windowListeners[event.type]?.(event);
     },
     getSelection: () => ({ toString: () => '' }),
@@ -77,7 +78,7 @@ function createHarness() {
       });
     },
     armAutomaticCapture() {
-      window.dispatchEvent({ type: 'speedrundle:capture-result' });
+      window.dispatchEvent({ type: 'daily-games-speedrun:capture-result' });
     },
     rejectClipboardWrites() {
       failWrites = true;
@@ -112,7 +113,7 @@ test('a Share click captures the exact Clipboard API text', async () => {
   assert.equal(await harness.clipboard.writeText(resultText), 'written');
   assert.deepEqual(harness.writes, [resultText]);
   assert.equal(harness.results.length, 1);
-  assert.equal(harness.results[0].type, 'speedrundle:game-result');
+  assert.equal(harness.results[0].type, 'daily-games-speedrun:game-result');
   assert.equal(harness.results[0].detail, resultText);
 });
 

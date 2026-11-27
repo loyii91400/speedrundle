@@ -13,7 +13,7 @@
           class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-400 text-base text-zinc-950"
           aria-hidden="true">⏱</span
         >
-        Speedrundle
+        Daily Games Speedrun
       </a>
       <div class="flex items-center gap-1 text-sm font-medium text-zinc-400">
         <a href="/" class="rounded-md px-3 py-2 transition-colors hover:text-zinc-100">Games</a>
@@ -41,7 +41,7 @@
       class="mx-auto flex w-full max-w-5xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-zinc-500 sm:flex-row sm:px-6"
     >
       <div class="text-center sm:text-left">
-        <p>Speedrundle — speedrun your daily puzzles.</p>
+        <p>Daily Games Speedrun — speedrun your daily puzzles.</p>
         <p class="mt-1 text-xs">
           Found a bug or have an issue?
           <a

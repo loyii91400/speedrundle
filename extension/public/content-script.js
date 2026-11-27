@@ -1,4 +1,4 @@
-// Speedrundle win/lose detector.
+// Daily Games Speedrun win/lose detector.
 //
 // Registered in manifest.json ("content_scripts"), so Chrome injects this on
 // configured puzzle sites. The win/lose detector arms itself only when this tab
@@ -7,9 +7,9 @@
 //
 // IMPORTANT: logs from this file go to the DevTools console of the PAGE this
 // script runs on (the puzzle tab) — never to the extension's service worker
-// console. Filter the page console by "[Speedrundle]".
+// console. Filter the page console by "[Daily Games Speedrun]".
 
-const TAG = '[Speedrundle]';
+const TAG = '[Daily Games Speedrun]';
 
 let puzzleState = null; // { key, checks, winWatch, loseWatch }
 let observer = null;
@@ -341,7 +341,7 @@ function findScoreButton(check) {
 // clipboard writes even if browser permission denies the actual background write.
 function captureScore(check, attemptsRemaining = check?.attempts ?? 20) {
   if (!check || typeof window === 'undefined') return;
-  window.dispatchEvent(new CustomEvent('speedrundle:capture-result'));
+  window.dispatchEvent(new CustomEvent('daily-games-speedrun:capture-result'));
   const button = findScoreButton(check);
   if (button) {
     button.click();
@@ -671,7 +671,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
 // by a Share/Copy control. Keep scorePuzzle after disarming so the result can
 // still be saved when the user returns to a finished puzzle and clicks Share.
 if (typeof window !== 'undefined') {
-  window.addEventListener('speedrundle:game-result', (event) => {
+  window.addEventListener('daily-games-speedrun:game-result', (event) => {
     sendPuzzleScore(event.detail);
   });
 }

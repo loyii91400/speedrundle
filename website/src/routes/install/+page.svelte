@@ -26,7 +26,7 @@
         },
         {
           title: 'Start your first run',
-          note: 'Click the Speedrundle toolbar icon to open the side panel, then start a run and race your daily puzzles.'
+          note: 'Click the Daily Games Speedrun toolbar icon to open the side panel, then start a run and race your daily puzzles.'
         }
       ]
     },
@@ -34,7 +34,7 @@
       id: 'firefox',
       name: 'Firefox',
       description:
-        'Firefox 128 or later is required. This installs Speedrundle as a temporary add-on, which is removed when Firefox restarts.',
+        'Firefox 128 or later is required. This installs Daily Games Speedrun as a temporary add-on, which is removed when Firefox restarts.',
       steps: [
         {
           title: 'Load it temporarily in Firefox',
@@ -42,7 +42,7 @@
         },
         {
           title: 'Start your first run',
-          note: 'Click the Speedrundle toolbar icon to open the sidebar, then start a run and race your daily puzzles.'
+          note: 'Click the Daily Games Speedrun toolbar icon to open the sidebar, then start a run and race your daily puzzles.'
         }
       ]
     }
@@ -50,19 +50,19 @@
 </script>
 
 <svelte:head>
-  <title>Install the extension — Speedrundle</title>
+  <title>Install the extension — Daily Games Speedrun</title>
   <meta
     name="description"
-    content="Install Speedrundle for Chrome or Firefox and speedrun your daily puzzle games in one timed run."
+    content="Install Daily Games Speedrun for Chrome or Firefox and speedrun your daily puzzle games in one timed run."
   />
 </svelte:head>
 
 <section class="mx-auto max-w-2xl">
   <p class="mb-3 text-xs font-semibold tracking-widest text-amber-400 uppercase">Get started</p>
-  <h1 class="font-display text-4xl font-bold tracking-tight">Install Speedrundle</h1>
+  <h1 class="font-display text-4xl font-bold tracking-tight">Install Daily Games Speedrun</h1>
   <p class="mt-4 text-zinc-400">
-    Speedrundle is a free browser extension that strings your daily puzzles into one timed run.
-    Install it from the Chrome Web Store, or build it from source for Chrome or Firefox.
+    Daily Games Speedrun is a free browser extension that strings your daily puzzles into one timed
+    run. Install it from the Chrome Web Store, or build it from source for Chrome or Firefox.
   </p>
 
   <div class="mt-6 flex flex-wrap gap-3">
@@ -82,14 +82,14 @@
     </a>
   </div>
   <p class="mt-3 text-sm text-zinc-500">
-    Once installed from the Chrome Web Store, click the Speedrundle toolbar icon to open the side
-    panel and start your first run.
+    Once installed from the Chrome Web Store, click the Daily Games Speedrun toolbar icon to open
+    the side panel and start your first run.
   </p>
 
   <div class="mt-14 border-t border-zinc-800 pt-8">
     <h2 class="font-display text-2xl font-bold tracking-tight">Or build from source</h2>
     <p class="mt-2 text-sm text-zinc-400">
-      Speedrundle is open source — you can also build and load the extension yourself via
+      Daily Games Speedrun is open source — you can also build and load the extension yourself via
       <a
         href={REPO_URL}
         target="_blank"

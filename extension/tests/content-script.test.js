@@ -380,7 +380,7 @@ test('completion clicks the configured Share control', () => {
   assert.equal(clicks, 1);
   assert.ok(
     harness.dispatchedEvents.some(
-      (event) => event.type === 'speedrundle:capture-result'
+      (event) => event.type === 'daily-games-speedrun:capture-result'
     )
   );
 });

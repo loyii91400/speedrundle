@@ -38,7 +38,7 @@ if (!files['manifest.json']) {
   throw new Error(`dist/${browser}/manifest.json is missing`);
 }
 
-const outputName = `speedrundle-${browser}.zip`;
+const outputName = `daily-games-speedrun-${browser}.zip`;
 const archive = zipSync(files, { level: 9 });
 writeFileSync(new URL(`../dist/${outputName}`, import.meta.url), archive);
 console.log(

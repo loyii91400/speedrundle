@@ -1,6 +1,6 @@
-# Speedrundle
+# Daily Games Speedrun
 
-Speedrun your daily puzzle games. Speedrundle is a browser extension (Manifest V3) that strings your daily puzzles — Wordle, the NYT Mini, Strands, Connections, and more — into a single timed run, with automatic splits when each game detects your win (or loss).
+Speedrun your daily puzzle games. Daily Games Speedrun is a browser extension (Manifest V3) that strings your daily puzzles — Wordle, the NYT Mini, Strands, Connections, and more — into a single timed run, with automatic splits when each game detects your win (or loss).
 
 Install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/dbfenbaoamakbdffgddofjmfeblfjohl), or build the Chrome or Firefox version from source (below).
 
@@ -23,6 +23,18 @@ npm run dev      # plain-web dev mode (uses localStorage instead of chrome.stora
 
 In dev mode the app runs in a normal browser tab, but tab management and auto-detection only work inside the extension.
 
+## Bumping the extension version
+
+From `extension/`, run one command:
+
+```sh
+npm run bump -- patch  # bug fixes and small changes
+npm run bump -- minor  # new backward-compatible features
+npm run bump -- major  # breaking changes
+```
+
+You can also pass an explicit version, such as `npm run bump -- 1.2.0`. This updates `package.json`, `package-lock.json`, and both browser manifests without creating a Git commit or tag.
+
 ## Building the extension
 
 ```sh
@@ -32,8 +44,8 @@ npm run build
 
 This creates two unpacked extensions and their ZIP archives:
 
-- Chrome: `extension/dist/chrome/` and `extension/dist/speedrundle-chrome.zip`
-- Firefox: `extension/dist/firefox/` and `extension/dist/speedrundle-firefox.zip`
+- Chrome: `extension/dist/chrome/` and `extension/dist/daily-games-speedrun-chrome.zip`
+- Firefox: `extension/dist/firefox/` and `extension/dist/daily-games-speedrun-firefox.zip`
 
 Each ZIP contains `manifest.json` at its root, ready for browser-store upload. You can also build and zip only one browser with `npm run build:chrome` or `npm run build:firefox` from `extension/`.
 
@@ -41,13 +53,13 @@ Each ZIP contains `manifest.json` at its root, ready for browser-store upload. Y
 
 1. Go to `chrome://extensions` and enable **Developer mode**.
 2. Click **Load unpacked** and select the `extension/dist/chrome/` directory.
-3. Click the Speedrundle toolbar icon to open the side panel.
+3. Click the Daily Games Speedrun toolbar icon to open the side panel.
 
 ### Load temporarily in Firefox
 
 1. Go to `about:debugging#/runtime/this-firefox`.
 2. Click **Load Temporary Add-on** and select `extension/dist/firefox/manifest.json`.
-3. Click the Speedrundle toolbar icon to open the sidebar.
+3. Click the Daily Games Speedrun toolbar icon to open the sidebar.
 
 ## Other scripts
 
