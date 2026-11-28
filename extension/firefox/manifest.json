@@ -1,7 +1,7 @@
 {
   "name": "Daily Games Speedrun",
   "description": "Speedrun your daily puzzle games.",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
@@ -21,49 +21,62 @@
       "id": "speedrundle@loyii91400",
       "strict_min_version": "142.0",
       "data_collection_permissions": {
-        "required": ["none"]
+        "required": [
+          "none"
+        ]
       }
     }
   },
-  "permissions": ["storage"],
+  "permissions": [
+    "storage"
+  ],
   "content_scripts": [
     {
       "matches": [
-        "https://www.nytimes.com/*",
+        "https://www.nytimes.com/games/wordle*",
+        "https://www.nytimes.com/games/strands*",
+        "https://www.nytimes.com/games/connections*",
         "https://minicrossword.com/*",
-        "https://games.washingtonpost.com/*",
+        "https://games.washingtonpost.com/games/daily-word-search*",
         "https://squaredle.app/*",
         "https://verticle.netlify.app/*",
         "https://www.thewikigamedaily.com/*",
-        "https://bandle.app/*",
+        "https://bandle.app/daily*",
         "https://towerofquestions.com/*",
         "https://krillion.io/*",
         "https://patchguesser.site/*",
         "https://xordle.org/*"
       ],
-      "js": ["content-script.js"],
+      "js": [
+        "content-script.js"
+      ],
       "run_at": "document_idle"
     },
     {
       "matches": [
-        "https://www.nytimes.com/*",
+        "https://www.nytimes.com/games/wordle*",
+        "https://www.nytimes.com/games/strands*",
+        "https://www.nytimes.com/games/connections*",
         "https://minicrossword.com/*",
-        "https://games.washingtonpost.com/*",
         "https://squaredle.app/*",
         "https://verticle.netlify.app/*",
         "https://www.thewikigamedaily.com/*",
-        "https://bandle.app/*",
+        "https://bandle.app/daily*",
         "https://towerofquestions.com/*",
         "https://krillion.io/*",
         "https://patchguesser.site/*",
         "https://xordle.org/*"
       ],
-      "js": ["clipboard-listener.js"],
+      "js": [
+        "clipboard-listener.js"
+      ],
       "run_at": "document_start",
       "world": "MAIN"
     }
   ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": [
+      "background.js"
+    ]
   }
 }

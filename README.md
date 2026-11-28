@@ -117,5 +117,6 @@ npm run sync:links # regenerate links.json + both browser manifests' match lists
 ```
 
 The game catalogue lives in `website/src/lib/data/games.json` — the single source of truth
-for both the site and the extension. After adding a game there, run `npm run sync:links` in
-`website/` so the extension can load and detect it.
+for both the site and the extension. Each game declares `matchPatterns` to scope content-script
+access and `captureResults` to control whether the share-result observer is injected. After
+adding a game there, run `npm run sync:links` in `website/` so the extension can load and detect it.

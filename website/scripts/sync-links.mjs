@@ -5,8 +5,9 @@
  *   1. Writes `extension/public/links.json` (what the extension side panel loads), stripping
  *      website-only fields (slug, description). Category and publisher are kept —
  *      the extension's puzzle settings use them for search and filtering.
- *   2. Updates every content-script `matches` list in the Chrome and Firefox manifests so
- *      detection and Share-result capture are injected on every game's site.
+ *   2. Updates content-script `matches` lists in the Chrome and Firefox manifests from each
+ *      game's explicit matchPatterns. Share-result capture is limited to games with
+ *      captureResults enabled.
  *
  * Run from the website directory: npm run sync:links
  */
@@ -46,16 +47,56 @@ const linksPath = fileURLToPath(new URL('../../extension/public/links.json', imp
 await writeJson(linksPath, links);
 console.log(`wrote ${links.length} games to extension/public/links.json`);
 
-// 2. Content-script matches: every game's origin, so all page hooks run everywhere.
-const matches = [...new Set(links.map((game) => `${new URL(game.url).origin}/*`))];
+// 2. Content-script matches are an explicit per-game permission boundary. Do not
+// silently fall back to origin-wide access when adding a game.
+for (const game of catalogue.games) {
+  if (
+    !Array.isArray(game.matchPatterns) ||
+    game.matchPatterns.length === 0 ||
+    game.matchPatterns.some(
+      (pattern) => typeof pattern !== 'string' || pattern.length === 0
+    )
+  ) {
+    throw new Error(
+      `${game.slug ?? game.name}: matchPatterns must contain at least one non-empty string`
+    );
+  }
+  if (typeof game.captureResults !== 'boolean') {
+    throw new Error(
+      `${game.slug ?? game.name}: captureResults must be a boolean`
+    );
+  }
+}
+
+const unique = (values) => [...new Set(values)];
+const detectionMatches = unique(
+  catalogue.games.flatMap((game) => game.matchPatterns)
+);
+const captureMatches = unique(
+  catalogue.games
+    .filter((game) => game.captureResults)
+    .flatMap((game) => game.matchPatterns)
+);
+
 for (const browser of ['chrome', 'firefox']) {
   const manifestPath = fileURLToPath(
     new URL(`../../extension/${browser}/manifest.json`, import.meta.url)
   );
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
-  for (const contentScript of manifest.content_scripts) {
-    contentScript.matches = matches;
+  const scriptsByName = Object.fromEntries(
+    manifest.content_scripts.map((script) => [script.js[0], script])
+  );
+  const detectionScript = scriptsByName['content-script.js'];
+  const captureScript = scriptsByName['clipboard-listener.js'];
+  if (!detectionScript || !captureScript) {
+    throw new Error(
+      `${browser}: expected content-script.js and clipboard-listener.js entries`
+    );
   }
+  detectionScript.matches = detectionMatches;
+  captureScript.matches = captureMatches;
   await writeJson(manifestPath, manifest);
 }
-console.log(`updated Chrome and Firefox content-script matches: ${matches.join(', ')}`);
+console.log(
+  `updated Chrome and Firefox content-script matches: ${detectionMatches.length} detection, ${captureMatches.length} capture`
+);
