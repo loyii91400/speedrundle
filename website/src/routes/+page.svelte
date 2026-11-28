@@ -71,12 +71,10 @@
   </h1>
   <div class="mt-6 flex items-center justify-center gap-3">
     <a
-      href={CHROME_STORE_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      class="rounded-lg bg-amber-400 px-5 py-2.5 font-semibold text-zinc-950 transition-colors hover:bg-amber-300"
+        href="/install"
+        class="rounded-lg bg-amber-400 px-5 py-2.5 font-semibold text-zinc-950 transition-colors hover:bg-amber-300"
     >
-      Install Extension
+        Install Extension
     </a>
     <a
       href="#games"
