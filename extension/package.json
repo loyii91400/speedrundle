@@ -8,6 +8,7 @@
     "bump": "npm version --no-git-tag-version",
     "version": "node scripts/sync-version.mjs",
     "build": "npm run build:chrome && npm run build:firefox",
+    "build:all": "npm --prefix ../website run sync:links && npm run package:source && npm run build",
     "build:chrome": "vite build --mode chrome && node scripts/zip-build.mjs chrome",
     "build:firefox": "vite build --mode firefox && node scripts/zip-build.mjs firefox",
     "preview": "vite preview",

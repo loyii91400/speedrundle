@@ -49,6 +49,14 @@ This creates two unpacked extensions and their ZIP archives:
 
 Each ZIP contains `manifest.json` at its root, ready for browser-store upload. You can also build and zip only one browser with `npm run build:chrome` or `npm run build:firefox` from `extension/`.
 
+To sync the game catalogue, create the source-code ZIP, and build both browser extensions in one command, run from `extension/`:
+
+```sh
+npm run build:all
+```
+
+This requires dependencies to be installed in both `extension/` and `website/`.
+
 ### Load in Chrome
 
 1. Go to `chrome://extensions` and enable **Developer mode**.
